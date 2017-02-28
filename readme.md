@@ -1,7 +1,7 @@
-# SiTCW
+## SiTCW
 SiTCW stands for "Сети и Телекоммуникации Курсовая работа"
 
-# What are we doing?
+## What are we doing?
 According to the [Statements of Work](https://github.com/OverLucker/SiTCW/blob/master/docs/states_of_work.odt) we are creating Mail application
 Each of N PCs connected in a Ring Topology. They are communicating using
  custom protocol:
@@ -10,7 +10,7 @@ Each of N PCs connected in a Ring Topology. They are communicating using
   * 2nd layer is data link layer
   * 3rd layer is application layer
 
-# Tasks to accomplish:
+## Tasks to accomplish:
 - [ ] physical layer
 - [ ] data link layer
 - [ ] application layer
