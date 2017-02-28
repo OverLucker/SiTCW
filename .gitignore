@@ -1,3 +1,8 @@
+# MS VS files
+GeneratedFiles
+x64
+*.vcxproj*
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
