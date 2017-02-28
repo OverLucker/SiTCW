@@ -9,9 +9,7 @@
 #ifndef DATA_LINK_LAYER
 #define DATA_LINK_LAYER
 
-#include "qserialport.h"
-#include "qserialportglobal.h"
-#include "qserialportinfo.h"
+#include "physical_layer.h"
 
 // dl_api_send
 // dl_api_get(void * callback)
