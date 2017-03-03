@@ -1,0 +1,94 @@
+login максимальная длина 10 символов ascii
+
+classes:
+    IMessage - пришло мне
+    OMessage - отправил я
+
+######################################################
+События:
+
+Пришло сообщение
+
+void new_message(IMessage &message);
+
+*READ ONLY*
+message{
+    from: user_id,
+    mes_id: mes_id /* from user_id */,
+    text: ...,
+    to: local_user_id,
+
+    bool make_read(),
+    bool is_read()
+}
+
+-------------------------------------------------------
+- изменение статуса сообщения:
+
+Сообщение прочитано
+
+void message_read( OMessage &message);
+
+*READ ONLY*
+message{
+    from: local_user_id,
+    mes_id: mes_id /* from user_id */,
+    to: user_id,
+    text: ...
+}
+
+Сообщение доставлено
+
+void message_delivered( OMessage &message);
+
+*READ ONLY*
+message{
+    from: local_user_id,
+    mes_id: mes_id /* from user_id */,
+    to: user_id
+}
+
+-------------------------------------------------------
+- изменение статуса пользователя:
+
+void user_staus(std::string, UserStatus status);
+
+string - уникальный логин в сети
+status - enum('active', 'inactive')
+
+Пользователь залогинился
+Пользователь разлогинился
+-------------------------------------------------------
+- измение статуса сети:
+
+void network_crashed();
+
+Сеть не работает
+
+
+######################################################
+Методы:
+
+- я залогинился
+bool login(std::string user_name)
+
+- я разлогинился
+bool logout(std::string user_name)
+
+- я отправляю сообщение
+bool sent_message(std::vector <OMessage> message)
+
+*READ ONLY*
+message{
+    from: local_user_id,
+    mes_id: mes_id /* from user_id */,
+    to: user_id,
+    text: ...
+}
+
+
+- я прочитал сообщение
+
+там вверху есть метод такой
+
+
