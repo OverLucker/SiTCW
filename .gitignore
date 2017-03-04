@@ -12,6 +12,9 @@ Released/
 # Not sure if we should ignore it
 *.pro.user
 
+# macOS
+build*
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
