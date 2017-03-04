@@ -11,7 +11,6 @@
 
 #include "physical_layer.h"
 #include <vector>
-#include <tchar.h>
 #include <QDataStream>
 
 typedef unsigned char uchar;
