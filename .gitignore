@@ -3,6 +3,9 @@ GeneratedFiles
 x64
 *.vcxproj*
 
+# macOS
+build*
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
