@@ -2,6 +2,12 @@
 GeneratedFiles
 x64
 *.vcxproj*
+*.sln
+*.VC*
+.vs
+
+# Not sure if we should ignore it
+*.pro.user
 
 # Windows image file caches
 Thumbs.db
