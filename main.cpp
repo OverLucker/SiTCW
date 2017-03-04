@@ -1,5 +1,7 @@
 #include "sitcw.h"
 #include <QtWidgets/QApplication>
+#include <QTextCodec>
+
 
 int main(int argc, char *argv[])
 {
