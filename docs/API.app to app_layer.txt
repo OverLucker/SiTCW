@@ -1,25 +1,21 @@
 login максимальная длина 10 символов ascii
 
 classes:
-    IMessage - пришло мне
-    OMessage - отправил я
+    Message - сообщение
 
 ######################################################
 События:
 
 Пришло сообщение
 
-void new_message(IMessage &message);
+void new_message(Message &message);
 
 *READ ONLY*
 message{
     from: user_id,
     mes_id: mes_id /* from user_id */,
     text: ...,
-    to: local_user_id,
-
-    bool make_read(),
-    bool is_read()
+    to: local_user_id
 }
 
 -------------------------------------------------------
@@ -27,7 +23,7 @@ message{
 
 Сообщение прочитано
 
-void message_read( OMessage &message);
+void message_read(Message &message);
 
 *READ ONLY*
 message{
@@ -39,7 +35,7 @@ message{
 
 Сообщение доставлено
 
-void message_delivered( OMessage &message);
+void message_delivered(Message &message);
 
 *READ ONLY*
 message{
@@ -76,7 +72,7 @@ bool login(std::string user_name)
 bool logout(std::string user_name)
 
 - я отправляю сообщение
-bool sent_message(std::vector <OMessage> message)
+bool sent_message(std::vector <Message> message)
 
 *READ ONLY*
 message{
@@ -86,8 +82,9 @@ message{
     text: ...
 }
 
-
 - я прочитал сообщение
+bool make_read(std::vector <Message> message)
+bool is_read(std::vector <Message> message)
 
 там вверху есть метод такой
 
