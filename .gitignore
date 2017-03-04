@@ -7,13 +7,10 @@ x64
 .vs
 debug/
 Debug/
-Released/
+Release/
 
 # Not sure if we should ignore it
 *.pro.user
-
-# macOS
-build*
 
 # Windows image file caches
 Thumbs.db
