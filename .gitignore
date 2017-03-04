@@ -6,6 +6,8 @@ x64
 *.VC*
 .vs
 debug/
+Debug/
+Released/
 
 # Not sure if we should ignore it
 *.pro.user
