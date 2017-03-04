@@ -1,4 +1,4 @@
-#include "sitcw.h"
+﻿#include "sitcw.h"
 #include <QtWidgets/QApplication>
 #include <QTextCodec>
 

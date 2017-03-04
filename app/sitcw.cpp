@@ -1,7 +1,7 @@
 ﻿#include "sitcw.h"
 #include "data_link_layer.h"
 #include <QTextCodec>
-#include <QSerialPortInfo>
+#include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
 
 // VERY IMPORTANT THING!!!
