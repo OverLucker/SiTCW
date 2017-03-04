@@ -5,6 +5,7 @@ x64
 *.sln
 *.VC*
 .vs
+debug/
 
 # Not sure if we should ignore it
 *.pro.user
