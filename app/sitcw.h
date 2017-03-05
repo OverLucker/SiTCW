@@ -3,6 +3,9 @@
 #include <QtWidgets/QMainWindow>
 #include <QtSerialPort/QSerialPort>
 #include "ui_sitcw.h"
+//#include "app_layer.h"
+#include "postserial.h"
+
 
 class SiTCW : public QMainWindow
 {
@@ -20,6 +23,6 @@ private slots:
 
 private:
 	Ui::SiTCWClass ui;
-	QSerialPort * serial;
+	PostSerial * serial;
 
 };

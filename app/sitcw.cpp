@@ -14,7 +14,7 @@ SiTCW::SiTCW(QWidget *parent)
 {
 	ui.setupUi(this);
 	
-	serial = new QSerialPort(this);
+	serial = new PostSerial(this);
 
 	// running tests
 	QVector<quint8> tmp = { quint8(1), quint8(2), quint8(3) };
@@ -99,7 +99,7 @@ void SiTCW::SiTCW::closeSerialPort()
 void SiTCW::SiTCW::readData()
 {
 	QByteArray data = serial->readAll();
-	ui.textBrowser->append(data);
+	ui.textBrowser->append(QString("Received data '%1' sended by %2").arg(QString(data), sender()->objectName()));
 }
 
 void SiTCW::SiTCW::writeData()
