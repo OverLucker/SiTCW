@@ -15,6 +15,8 @@ private slots:
 	void closeSerialPort();
 	void writeData();
 	void readData();
+    void add_item();
+    void select_user(QListWidgetItem * item);
 
 private:
 	Ui::SiTCWClass ui;
