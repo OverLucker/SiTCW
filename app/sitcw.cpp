@@ -20,7 +20,7 @@ SiTCW::SiTCW(QWidget *parent)
 
 	connect(ui.btnConnect, SIGNAL(released()), this, SLOT(openSerialPort()));
 	connect(ui.btnDisconnect, SIGNAL(released()), this, SLOT(closeSerialPort()));
-	connect(serial, &QSerialPort::readyRead, this, &SiTCW::readData);
+	connect(serial, &PostSerial::new_message, this, &SiTCW::IncMessage);
 	connect(ui.btnSend, SIGNAL(released()), this, SLOT(writeData()));
 /*
 	for(auto it : QSerialPortInfo::availablePorts())
@@ -51,11 +51,16 @@ void SiTCW::SiTCW::closeSerialPort()
 
 void SiTCW::SiTCW::readData()
 {
-	QByteArray data = serial->readAll();
-	ui.textBrowser->append(QString("Received data '%1' sended by %2").arg(QString(data), sender()->objectName()));
+	//QByteArray data = serial->readAll();
+	//ui.textBrowser->append(QString("Received data '%1' sended by %2").arg(QString(data), sender()->objectName()));
 }
 
 void SiTCW::SiTCW::writeData()
 {
-	serial->write(QByteArray(ui.teMess->toPlainText().toStdString().c_str()));
+	serial->send_message(Message("me", "anton", ui.teMess->toPlainText().toStdString()));
+	//serial->write(QByteArray(ui.teMess->toPlainText().toStdString().c_str()));
+}
+
+void SiTCW::SiTCW::IncMessage(Message& mess) {
+	ui.textBrowser->append(QString("%1 send to %2 message %3").arg(mess.getSender().c_str(), mess.getRecepient().c_str(), mess.getMessage().c_str()));
 }

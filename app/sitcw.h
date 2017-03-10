@@ -18,6 +18,7 @@ private slots:
 	void closeSerialPort();
 	void writeData();
 	void readData();
+	void IncMessage(Message&);
 
 private:
 	Ui::SiTCWClass ui;

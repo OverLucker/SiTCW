@@ -17,6 +17,9 @@ typedef unsigned char uchar;
 
 const int TOKEN_MAX_TIMEOUT = 15;
 
+
+
+
 enum class FrameType {
 	SuperVisor = 1,
 	Information = 2,
@@ -139,8 +142,9 @@ public:
 
 
 
-typedef void(*handler)(char*);
-QMap<FrameType, handler> handlers;
+
+
+//QMap<FrameType, handler> handlers;
 
 void supervisor_handler(char * data) {
 
