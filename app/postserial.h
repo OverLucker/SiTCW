@@ -6,6 +6,8 @@
 #ifndef POST_SERIAL
 #define POST_SERIAL
 
+#include <QSerialPort>
+
 #include "message.h"
 #include "directed_token_ring.h"
 

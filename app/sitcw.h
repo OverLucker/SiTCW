@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <QtWidgets/QMainWindow>
-#include <QtSerialPort/QSerialPort>
 #include "ui_sitcw.h"
 //#include "app_layer.h"
 #include "postserial.h"
@@ -16,10 +15,15 @@ public:
 private slots:
 	void writeData();
 	void readData();
-	void IncMessage(Message);
+
+  void add_item();
+  void select_user(QListWidgetItem * item);
+
+  void new_message(Message message);
+
 
 private:
 	Ui::SiTCWClass ui;
-	PostSerial * serial;
+    PostSerial * serial;
 
 };
