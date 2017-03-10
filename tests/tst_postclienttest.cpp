@@ -26,7 +26,7 @@ void PostClientTest::testHammingCodec_data()
 void PostClientTest::testHammingCodec()
 {
     QFETCH(QString, data);
-    QVERIFY2(true, "Failure");
+    QVERIFY2(data == "1", "Failure");
 }
 
 QTEST_APPLESS_MAIN(PostClientTest)

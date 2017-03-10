@@ -17,11 +17,11 @@ private slots:
 	void closeSerialPort();
 	void writeData();
 	void readData();
-    void add_item();
-    void select_user(QListWidgetItem * item);
+  void add_item();
+  void select_user(QListWidgetItem * item);
 
 
-    void new_message(Message message);
+  void new_message(Message message);
 
 
 private:

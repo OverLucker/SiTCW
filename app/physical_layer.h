@@ -8,9 +8,6 @@
 #ifndef PHYSICAL_LAYER
 #define PHYSICAL_LAYER
 
-#include <QtSerialPort/QSerialPort>
-
-
 // pl_api_send
 // pl_api_get
 

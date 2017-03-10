@@ -28,14 +28,10 @@ public:
 	std::string getMessage() { return this->message; }
 };
 
+
 enum class UserStatus {
-	InActive,
+	Inactive,
 	Active
-};
-
-// Сообщение для отправки
-class OutMessage : public Message {
-
 };
 
 

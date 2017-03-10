@@ -19,13 +19,14 @@ SiTCW::SiTCW(QWidget *parent)
 	// running tests
 	QVector<quint8> tmp = { quint8(1), quint8(2), quint8(3) };
 
-    connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(openSerialPort()));
-    connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(closeSerialPort()));
+  connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(openSerialPort()));
+  connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(closeSerialPort()));
 
-    connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
+  connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
 
-    connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
-    connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
+  connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
+  connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
+
 /*
 	for(auto it : QSerialPortInfo::availablePorts())
 		ui.textBrowser->append(it.portName());*/
@@ -140,10 +141,12 @@ void SiTCW::SiTCW::closeSerialPort()
 void SiTCW::SiTCW::readData()
 {
 	QByteArray data = serial->readAll();
-//	ui.textBrowser->append(QString("Received data '%1' sended by %2").arg(QString(data), sender()->objectName()));
 }
 
 void SiTCW::SiTCW::writeData()
 {
-//	serial->write(QByteArray(ui.teMess->toPlainText().toStdString().c_str()));
+}
+
+void SiTCW::SiTCW::IncMessage(Message& mess) {
+	ui.textBrowser->append(QString("%1 send to %2 message %3").arg(mess.getSender().c_str(), mess.getRecepient().c_str(), mess.getMessage().c_str()));
 }
