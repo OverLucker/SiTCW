@@ -13,7 +13,8 @@
 #include <vector>
 #include <QDataStream>
 
-typedef unsigned char uchar;
+/*
+typedef unsigned char uchar; 
 
 const int TOKEN_MAX_TIMEOUT = 15;
 
@@ -198,5 +199,7 @@ int frame_checker(char * data) {
 
 // dl_api_send
 // dl_api_get(void * callback)
+
+*/
 
 #endif // !DATA_LINK_LAYER

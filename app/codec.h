@@ -6,20 +6,20 @@
 
 class Codec {
 public:
-	virtual const QByteArray& encode(QByteArray& data) = 0;
-	virtual const QByteArray& decode(QByteArray& data) = 0;
+	virtual const QByteArray& encode(const QByteArray& data) = 0;
+	virtual const QByteArray& decode(const QByteArray& data) = 0;
 };
 
 
 class HammingCodec : public Codec {
 
 public:
-	virtual const QByteArray& encode(QByteArray& data) {
+	virtual const QByteArray& encode(const QByteArray& data) {
 		// ToDo: write encoder
 		return data;
 	}
 
-	virtual const QByteArray& decode(QByteArray& data) {
+	virtual const QByteArray& decode(const QByteArray& data) {
 		// ToDo: write decoder
 		return data;
 	}

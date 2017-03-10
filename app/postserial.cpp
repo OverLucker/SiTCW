@@ -1,8 +1,7 @@
 #include "postserial.h"
 
-void PostSerial::readHandle() {
-	QByteArray data = this->readAll();
 
+void PostSerial::readHandle(QByteArray data) {
 
 	// parse what data came etc
 	// depending on data came we should decide which signal to emit
@@ -14,8 +13,9 @@ void PostSerial::readHandle() {
 	emit new_message(mess);
 }
 
+
 int PostSerial::send_message(Message& mess) {
 	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(mess.getSender().c_str(), mess.getRecepient().c_str(), mess.getMessage().c_str());
-	this->write(data.toStdString().c_str());
+	this->send(data.toStdString().c_str());
 	return true;
 }

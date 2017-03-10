@@ -6,20 +6,21 @@
 #ifndef POST_SERIAL
 #define POST_SERIAL
 
-#include <QtSerialPort\QSerialPort>
 #include "message.h"
+#include "directed_token_ring.h"
 
 
-class PostSerial : public QSerialPort {
+class PostSerial : public DirectedTokenRing {
 	Q_OBJECT
 
 private slots:
-	void readHandle();
+	void readHandle(QByteArray);
 
 
 public:
-	PostSerial(QObject * parent) : QSerialPort(parent) { 
-		connect(this, &QSerialPort::readyRead, this, &PostSerial::readHandle);
+
+	PostSerial(QObject * parent) : DirectedTokenRing(parent) {
+		connect(this, &DirectedTokenRing::new_message, this, &PostSerial::readHandle);
 	}
 	
 	int send_message(Message& message);
@@ -29,9 +30,9 @@ public:
 
 
 signals:
-	void new_message(Message& message);
-	void message_read(Message& message);
-	void message_delivered(Message& message);
+	void new_message(Message message);
+	void message_read(Message message);
+	void message_delivered(Message message);
 	void user_status(QString username, UserStatus status);
 };
 

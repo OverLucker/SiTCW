@@ -14,11 +14,9 @@ public:
 	SiTCW(QWidget *parent = Q_NULLPTR);
 
 private slots:
-	void openSerialPort();
-	void closeSerialPort();
 	void writeData();
 	void readData();
-	void IncMessage(Message&);
+	void IncMessage(Message);
 
 private:
 	Ui::SiTCWClass ui;
