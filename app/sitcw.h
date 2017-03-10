@@ -13,13 +13,11 @@ public:
 	SiTCW(QWidget *parent = Q_NULLPTR);
 
 private slots:
-	void openSerialPort();
-	void closeSerialPort();
 	void writeData();
 	void readData();
+
   void add_item();
   void select_user(QListWidgetItem * item);
-
 
   void new_message(Message message);
 

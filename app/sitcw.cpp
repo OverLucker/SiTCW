@@ -16,6 +16,7 @@ SiTCW::SiTCW(QWidget *parent)
 	
     serial = new PostSerial(this);
 
+
 	// running tests
 	QVector<quint8> tmp = { quint8(1), quint8(2), quint8(3) };
 
@@ -138,6 +139,7 @@ void SiTCW::SiTCW::closeSerialPort()
 }
 
 
+
 void SiTCW::SiTCW::readData()
 {
 	QByteArray data = serial->readAll();
@@ -147,6 +149,6 @@ void SiTCW::SiTCW::writeData()
 {
 }
 
-void SiTCW::SiTCW::IncMessage(Message& mess) {
+void SiTCW::SiTCW::IncMessage(Message mess) {
 	ui.textBrowser->append(QString("%1 send to %2 message %3").arg(mess.getSender().c_str(), mess.getRecepient().c_str(), mess.getMessage().c_str()));
 }
