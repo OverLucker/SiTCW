@@ -13,9 +13,13 @@
 #include <vector>
 #include <QDataStream>
 
-typedef unsigned char uchar;
+/*
+typedef unsigned char uchar; 
 
 const int TOKEN_MAX_TIMEOUT = 15;
+
+
+
 
 enum class FrameType {
 	SuperVisor = 1,
@@ -139,8 +143,9 @@ public:
 
 
 
-typedef void(*handler)(char*);
-QMap<FrameType, handler> handlers;
+
+
+//QMap<FrameType, handler> handlers;
 
 void supervisor_handler(char * data) {
 
@@ -194,5 +199,7 @@ int frame_checker(char * data) {
 
 // dl_api_send
 // dl_api_get(void * callback)
+
+*/
 
 #endif // !DATA_LINK_LAYER
