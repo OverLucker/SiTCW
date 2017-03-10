@@ -4,6 +4,7 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
 #include <QHBoxLayout>
+#include "message.h"
 
 // VERY IMPORTANT THING!!!
 #pragma execution_character_set("utf-8")
@@ -23,18 +24,12 @@ SiTCW::SiTCW(QWidget *parent)
     connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(closeSerialPort()));
 
     connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
-
-    connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
+    connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(send_message()));
     connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
-/*
-	for(auto it : QSerialPortInfo::availablePorts())
-		ui.textBrowser->append(it.portName());*/
 }
 
 
-
-void SiTCW::SiTCW::new_message(Message message){
-
+void SiTCW::SiTCW::render_message(Message message){
     QVBoxLayout *MessageLayout= new QVBoxLayout();
 
     QLabel *MessageLabel = new QLabel(
@@ -63,8 +58,26 @@ void SiTCW::SiTCW::new_message(Message message){
     ui.messageList->addItem(ListItem);
     ui.messageList->setItemWidget(ListItem, MessageWidget );
     ui.messageList->setSelectionMode(QAbstractItemView::NoSelection);
+}
 
+void SiTCW::SiTCW::new_message(Message message){
+    this->render_message(message);
     // ... insert in database...
+}
+
+
+
+
+void SiTCW::SiTCW::send_message(){
+    Message message = Message(
+        "ОтправительИмя",
+        "ПолучательИмя",
+        ui.messageTextInput->toPlainText().toStdString()
+    );
+    this->render_message(message);
+    serial->send_message(message);
+
+    // ...insert in database ...
 }
 
 

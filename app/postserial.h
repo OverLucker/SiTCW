@@ -21,14 +21,14 @@ public:
 		connect(this, &QSerialPort::readyRead, this, &PostSerial::readHandle);
 	}
 	
-	int send_message(const Message& message);
+    int send_message(Message message);
 	int send_user_login(const QString& username);
 	int send_user_logout(const QString& username);
 	int notify_message_read(const Message& message);
 
 
 signals:
-	void new_message(Message& message);
+    void new_message(Message message);
 	void message_read(Message& message);
 	void message_delivered(Message& message);
 	void user_status(QString username, UserStatus status);

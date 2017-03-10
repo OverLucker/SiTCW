@@ -8,3 +8,9 @@ void PostSerial::readHandle() {
 	// depending on data came we should decide which signal to emit
 	emit this->readyRead();
 }
+
+
+int PostSerial::send_message(Message message){
+    //
+
+}
