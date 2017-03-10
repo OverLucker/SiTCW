@@ -25,7 +25,7 @@ public:
 		connect(this, &DirectedTokenRing::new_message, this, &PostSerial::readHandle);
 	}
 	
-	int send_message(Message& message);
+	int send_message(Message message);
 	int send_user_login(const QString& username);
 	int send_user_logout(const QString& username);
 	int notify_message_read(Message& message);

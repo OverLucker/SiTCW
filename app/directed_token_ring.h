@@ -41,9 +41,9 @@ private:
 	}
 
 	void createPhysicalAddress() {
-		pa[1] = "Vladislav";
-		pa[2] = "Alexander";
-		pa[3] = "Anton";
+		pa.insert(quint8(1), "Vladislav");
+		pa.insert(2, "Alexander");
+		pa.insert(3, "Anton");
 	}
 
 private slots:
@@ -52,7 +52,7 @@ private slots:
 
 public:
 	DirectedTokenRing(QObject * parent) : QObject(parent) {
-		connect(this->out, &QSerialPort::readyRead, this, &DirectedTokenRing::qserialreadHandler);
+		//connect(this->out, &QSerialPort::readyRead, this, &DirectedTokenRing::qserialreadHandler);
 		createPhysicalAddress();
 	}
 
