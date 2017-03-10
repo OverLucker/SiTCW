@@ -24,11 +24,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        sitcw.cpp
+        sitcw.cpp \
+    postserial.cpp
 
 HEADERS  += sitcw.h \
             app_layer.h \
             data_link_layer.h \
-            physical_layer.h
+            physical_layer.h \
+    postserial.h \
+    message.h
 
 FORMS    += sitcw.ui

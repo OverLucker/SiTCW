@@ -9,7 +9,7 @@
 #define APP_LAYER
 
 #include "data_link_layer.h"
-#include <QtSerialPort\QSerialPort>
+//#include <QtSerialPort\QSerialPort>
 
 #include "message.h"
 #include "postserial.h"

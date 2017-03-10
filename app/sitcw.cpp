@@ -14,17 +14,15 @@ SiTCW::SiTCW(QWidget *parent)
 {
 	ui.setupUi(this);
 	
-	serial = new PostSerial(this);
+    serial = new PostSerial(this);
 
 	// running tests
 	QVector<quint8> tmp = { quint8(1), quint8(2), quint8(3) };
 
-	connect(ui.btnConnect, SIGNAL(released()), this, SLOT(openSerialPort()));
-	connect(ui.btnDisconnect, SIGNAL(released()), this, SLOT(closeSerialPort()));
-	connect(serial, &QSerialPort::readyRead, this, &SiTCW::readData);
-	connect(ui.btnSend, SIGNAL(released()), this, SLOT(writeData()));
+    connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(openSerialPort()));
+    connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(closeSerialPort()));
 
-
+    connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
 
     connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
     connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
@@ -34,50 +32,88 @@ SiTCW::SiTCW(QWidget *parent)
 }
 
 
-void SiTCW::SiTCW::openSerialPort()
-{
-	serial->setPortName(ui.tePortName->toPlainText());
 
-	if (serial->open(QIODevice::ReadWrite)) {
-		QMessageBox::about(this, "Success", "Connected");
-	}
-	else {
-		QMessageBox::critical(this, tr("Error"), serial->errorString());
-	}
-}
+void SiTCW::SiTCW::new_message(Message message){
 
-void SiTCW::SiTCW::add_item(){
-//      const QString new_item = ui.itemName->toPlainText();
-//      ui.messageList->addItem(new_item);
+    QVBoxLayout *MessageLayout= new QVBoxLayout();
 
-//        FIRST EXAMPLE
-//    QGridLayout *layout = new QGridLayout(this);
-//    headerBar *Header = new headerBar(this);
-//    layout->addWidget(Header,0,0);
+    QLabel *MessageLabel = new QLabel(
+        QString::fromStdString(message.getSender()),
+        ui.messageList
+    );
 
+    QLabel *MessageText = new QLabel(
+        QString::fromStdString(message.getMessage()),
+        ui.messageList
+    );
 
-    QVBoxLayout *HLay= new QVBoxLayout();
+    MessageLabel->setStyleSheet("font-weight: bold");
+    MessageText->setMaximumWidth(601);
+    MessageText->setWordWrap(true);
 
-    QPushButton *b1 = new QPushButton("B1");
-    QPushButton *b2 = new QPushButton("B2");
+    MessageLayout->addWidget(MessageLabel);
+    MessageLayout->addWidget(MessageText);
 
-    HLay->addWidget(b1);
-    HLay->addWidget(b2);
-
-    QWidget * twoButtonWidget = new QWidget();
-    twoButtonWidget->setLayout( HLay );
+    QWidget * MessageWidget = new QWidget();
+    MessageWidget->setStyleSheet(" background-color: #fff; border-radius: 8px; margin-bottom: 10px; ");
+    MessageWidget->setLayout(MessageLayout);
 
     QListWidgetItem *ListItem=new QListWidgetItem();
-
-//    b1->setStyleSheet(   "color: blue;"
-//                                      "height: 150px;"
-////                                      "margin-right: 50px;"
-////                                      "margin-bottom: 50px;"
-//                                      "background-color: yellow;");
-
+    ListItem->setSizeHint( MessageWidget->sizeHint() );
     ui.messageList->addItem(ListItem);
-    ui.messageList->setItemWidget(ListItem, twoButtonWidget );
+    ui.messageList->setItemWidget(ListItem, MessageWidget );
+    ui.messageList->setSelectionMode(QAbstractItemView::NoSelection);
 
+    // ... insert in database...
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void SiTCW::SiTCW::openSerialPort()
+{
+//	serial->setPortName(ui.tePortName->toPlainText());
+
+//	if (serial->open(QIODevice::ReadWrite)) {
+//		QMessageBox::about(this, "Success", "Connected");
+//	}
+//	else {
+//		QMessageBox::critical(this, tr("Error"), serial->errorString());
+//	}
+}
+
+// SiTCW::SiTCW::create_message_widget
+
+void SiTCW::SiTCW::add_item(){
+
+    QVBoxLayout *MessageLayout= new QVBoxLayout();
+
+    QLabel *MessageLabel = new QLabel("Вася", ui.messageList);
+    QLabel *MessageText = new QLabel(ui.messageTextInput->toPlainText(), ui.messageList);
+    MessageLabel->setStyleSheet("font-weight: bold");
+    MessageText->setMaximumWidth(601);
+    MessageText->setWordWrap(true);
+
+    MessageLayout->addWidget(MessageLabel);
+    MessageLayout->addWidget(MessageText);
+
+    QWidget * MessageWidget = new QWidget();
+    MessageWidget->setStyleSheet(" background-color: #fff; border-radius: 8px; margin-bottom: 20px; ");
+    MessageWidget->setLayout(MessageLayout);
+
+    QListWidgetItem *ListItem=new QListWidgetItem();
+    ListItem->setSizeHint( MessageWidget->sizeHint() );
+    ui.messageList->addItem(ListItem);
+    ui.messageList->setItemWidget(ListItem, MessageWidget );
+    ui.messageList->setSelectionMode(QAbstractItemView::NoSelection);
 }
 
 void SiTCW::SiTCW::select_user(QListWidgetItem * item){
@@ -86,6 +122,11 @@ void SiTCW::SiTCW::select_user(QListWidgetItem * item){
     ui.currentItem->setText(text);
 
 }
+
+
+
+
+
 
 
 void SiTCW::SiTCW::closeSerialPort()
@@ -99,10 +140,10 @@ void SiTCW::SiTCW::closeSerialPort()
 void SiTCW::SiTCW::readData()
 {
 	QByteArray data = serial->readAll();
-	ui.textBrowser->append(QString("Received data '%1' sended by %2").arg(QString(data), sender()->objectName()));
+//	ui.textBrowser->append(QString("Received data '%1' sended by %2").arg(QString(data), sender()->objectName()));
 }
 
 void SiTCW::SiTCW::writeData()
 {
-	serial->write(QByteArray(ui.teMess->toPlainText().toStdString().c_str()));
+//	serial->write(QByteArray(ui.teMess->toPlainText().toStdString().c_str()));
 }

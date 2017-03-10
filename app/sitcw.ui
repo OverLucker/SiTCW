@@ -55,25 +55,12 @@
 	background-color: #fff;
 }</string>
    </property>
-   <widget class="QTextBrowser" name="textBrowser">
+   <widget class="QPushButton" name="netBtnConnect">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>141</width>
-      <height>141</height>
-     </rect>
-    </property>
-    <property name="lineWrapColumnOrWidth">
-     <number>1</number>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnConnect">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>360</y>
-      <width>81</width>
+      <x>170</x>
+      <y>70</y>
+      <width>151</width>
       <height>41</height>
      </rect>
     </property>
@@ -81,59 +68,29 @@
      <string>Connect</string>
     </property>
    </widget>
-   <widget class="QTextEdit" name="tePortName">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>330</y>
-      <width>161</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnDisconnect">
+   <widget class="QPushButton" name="netBtnDisconnect">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>360</y>
-      <width>81</width>
+      <y>70</y>
+      <width>151</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
     </property>
     <property name="text">
      <string>DisConnect</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="btnSend">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>300</y>
-      <width>93</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Send</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="teMess">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>170</y>
-      <width>121</width>
-      <height>111</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QListWidget" name="messageList">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>0</y>
-      <width>700</width>
-      <height>451</height>
+      <x>330</x>
+      <y>10</y>
+      <width>641</width>
+      <height>481</height>
      </rect>
     </property>
     <property name="focusPolicy">
@@ -144,33 +101,41 @@
     </property>
     <property name="styleSheet">
      <string notr="true">#messageList{
-	border: 0px solid white;
-	border-left: 1px solid black;
-	border-bottom: 1px solid black;
-	background-color: #fff;
+	border: 1px solid #ccc;
+	background-color: #eee;
 	padding: 10px;
+	border-radius: 8px;
 }</string>
+    </property>
+    <property name="isWrapping" stdset="0">
+     <bool>false</bool>
+    </property>
+    <property name="batchSize">
+     <number>300</number>
+    </property>
+    <property name="selectionRectVisible">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLabel" name="currentItem">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>30</y>
+      <x>10</x>
+      <y>20</y>
       <width>60</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Port in</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="messageTextInput">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>500</y>
-      <width>600</width>
+      <x>330</x>
+      <y>510</y>
+      <width>541</width>
       <height>50</height>
      </rect>
     </property>
@@ -181,16 +146,14 @@
     </property>
     <property name="styleSheet">
      <string notr="true">#messageTextInput{
-border: 1px solid #000;
-	
-
+	border: 1px solid #ccc;
 	padding: 10px;
-
 	border-radius: 8px;
+	background-color: #eee;
 }
 
 #messageTextInput:focus{
-	background-color: #ffaf15;
+	background-color: #fff;
 }
 
 </string>
@@ -202,10 +165,10 @@ border: 1px solid #000;
     </property>
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>530</y>
-      <width>100</width>
-      <height>72</height>
+      <x>880</x>
+      <y>510</y>
+      <width>91</width>
+      <height>50</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -232,12 +195,13 @@ border: 1px solid #000;
     </property>
     <property name="styleSheet">
      <string notr="true">#messageSendButton{
-	background-color: white;
-	border: 0px solid #000;
+	background-color: #eee;
+	border: 1px solid #ccc;
+	border-radius: 8px;
 }
 
 #messageSendButton:pressed {
-    background-color: #dfdfdf;
+    background-color: #fff;
     border-style: inset;
 }</string>
     </property>
@@ -253,6 +217,120 @@ border: 1px solid #000;
     <property name="flat">
      <bool>true</bool>
     </property>
+   </widget>
+   <widget class="QTextEdit" name="netInputPortIn">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>39</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">#messageTextInput{
+	border: 1px solid #ccc;
+	padding: 10px;
+	border-radius: 8px;
+	background-color: #eee;
+}
+
+#messageTextInput:focus{
+	background-color: #fff;
+}
+
+</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="netInputPortOut">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>39</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">#messageTextInput{
+	border: 1px solid #ccc;
+	padding: 10px;
+	border-radius: 8px;
+	background-color: #eee;
+}
+
+#messageTextInput:focus{
+	background-color: #fff;
+}
+
+</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="currentItem_2">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>20</y>
+      <width>60</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Port out</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="contactList">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>291</width>
+      <height>441</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">#messageList{
+	border: 1px solid #ccc;
+	background-color: #eee;
+	padding: 10px;
+	border-radius: 8px;
+}</string>
+    </property>
+    <property name="isWrapping" stdset="0">
+     <bool>false</bool>
+    </property>
+    <property name="batchSize">
+     <number>300</number>
+    </property>
+    <property name="selectionRectVisible">
+     <bool>false</bool>
+    </property>
+    <item>
+     <property name="text">
+      <string>Псевдо контакт 1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Псевдо контакт 2</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

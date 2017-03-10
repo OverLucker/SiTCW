@@ -4,7 +4,8 @@
 #ifndef POST_SERIAL
 #define POST_SERIAL
 
-#include <QtSerialPort\QSerialPort>
+#include <QSerialPort>
+//#include <QtSerialPort\QSerialPort>
 #include "message.h"
 
 
