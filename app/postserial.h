@@ -15,8 +15,6 @@
 class PostSerial : public DirectedTokenRing {
 	Q_OBJECT
 
-private slots:
-	void readHandle(QByteArray);
 
 
 public:
@@ -30,6 +28,8 @@ public:
 	int send_user_logout(const QString& username);
 	int notify_message_read(Message& message);
 
+private slots:
+    void readHandle(QByteArray);
 
 signals:
 	void new_message(Message message);

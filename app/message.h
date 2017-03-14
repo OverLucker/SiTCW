@@ -4,8 +4,6 @@
 #ifndef APP_LAYER_MESSAGE
 #define APP_LAYER_MESSAGE
 
-#include <QObject>
-
 class Message {
 protected:
 	bool read;

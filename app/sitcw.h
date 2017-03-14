@@ -18,7 +18,10 @@ private slots:
 	void select_user(QListWidgetItem * item);
 
 	void new_message(Message message);
-
+	void netConnect();
+	void netDisconnect();
+	void connectionOpen();
+	void netError(DirectedTokenRing::DirectedTokenRingError);
 
 private:
 	Ui::SiTCWClass ui;

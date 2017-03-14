@@ -10,7 +10,7 @@ void PostSerial::readHandle(QByteArray data) {
 	std::string to = chunks[1].split('=')[1].toStdString();
 	std::string message = chunks[2].split('=')[1].toStdString();
 	Message mess(from, to, message);
-	emit new_message(mess);
+    emit PostSerial::new_message(mess);
 }
 
 

@@ -13,9 +13,6 @@
     <height>600</height>
    </rect>
   </property>
-  <property name="mouseTracking">
-   <bool>false</bool>
-  </property>
   <property name="windowTitle">
    <string>SiTCW</string>
   </property>
@@ -59,9 +56,9 @@
     <property name="geometry">
      <rect>
       <x>170</x>
-      <y>70</y>
-      <width>151</width>
-      <height>41</height>
+      <y>80</y>
+      <width>141</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -71,10 +68,10 @@
    <widget class="QPushButton" name="netBtnDisconnect">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>70</y>
-      <width>151</width>
-      <height>41</height>
+      <x>20</x>
+      <y>80</y>
+      <width>141</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -218,64 +215,6 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QTextEdit" name="netInputPortIn">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>39</y>
-      <width>151</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">#messageTextInput{
-	border: 1px solid #ccc;
-	padding: 10px;
-	border-radius: 8px;
-	background-color: #eee;
-}
-
-#messageTextInput:focus{
-	background-color: #fff;
-}
-
-</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="netInputPortOut">
-    <property name="geometry">
-     <rect>
-      <x>170</x>
-      <y>39</y>
-      <width>151</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">#messageTextInput{
-	border: 1px solid #ccc;
-	padding: 10px;
-	border-radius: 8px;
-	background-color: #eee;
-}
-
-#messageTextInput:focus{
-	background-color: #fff;
-}
-
-</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="currentItem_2">
     <property name="geometry">
      <rect>
@@ -332,6 +271,26 @@
      </property>
     </item>
    </widget>
+   <widget class="QComboBox" name="netInputPortIn">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>40</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="netInputPortOut">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>40</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -339,7 +298,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>

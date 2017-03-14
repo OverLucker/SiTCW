@@ -16,10 +16,20 @@ SiTCW::SiTCW(QWidget *parent)
 	
     serial = new PostSerial(this);
 
+	for (auto item : QSerialPortInfo::availablePorts()) {
+		ui.netInputPortIn->insertItem(1000, item.portName(), 0);
+		ui.netInputPortOut->insertItem(1000, item.portName(), 0);
+	}
+		
+	
+	connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
+	connect(serial, &PostSerial::errorOccured, this, &SiTCW::netError);
 	connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
-
 	connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
 	connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
+	connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(netConnect()));
+	connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(netDisconnect()));
+	
 }
 
 
@@ -81,6 +91,12 @@ void SiTCW::SiTCW::add_item(){
     ui.messageList->addItem(ListItem);
     ui.messageList->setItemWidget(ListItem, MessageWidget );
     ui.messageList->setSelectionMode(QAbstractItemView::NoSelection);
+
+
+	// sending message
+	Message mess("Вася", "Anton", ui.messageTextInput->toPlainText().toStdString());
+
+	serial->send_message(mess);
 }
 
 void SiTCW::SiTCW::select_user(QListWidgetItem * item){
@@ -88,4 +104,25 @@ void SiTCW::SiTCW::select_user(QListWidgetItem * item){
     const QString text = item->text();
     ui.currentItem->setText(text);
 
+}
+
+void SiTCW::SiTCW::netConnect() {
+	int res = serial->network_connect(ui.netInputPortIn->currentText(), ui.netInputPortOut->currentText());
+	if (res) {
+		
+	}
+	else
+		QMessageBox::information(this, "Connection status", "An error occured");
+}
+
+void SiTCW::SiTCW::netDisconnect() {
+	serial->network_disconnect();
+}
+
+void SiTCW::SiTCW::connectionOpen() {
+	QMessageBox::information(this, "Connection status", "Success");
+}
+
+void SiTCW::SiTCW::netError(DirectedTokenRing::DirectedTokenRingError error) {
+	QMessageBox::information(this, "Connection status", "Network error occured");
 }
