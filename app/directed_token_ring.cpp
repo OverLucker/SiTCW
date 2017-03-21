@@ -1,4 +1,5 @@
 #include "directed_token_ring.h"
+#//include <QMessageBox>
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : QObject(parent) {
 
@@ -9,6 +10,9 @@ int DirectedTokenRing::network_connect(const QString& port_in, const QString& po
 	if (!this->in && !this->out) {
 		this->in = new QSerialPort(port_in, this);
 		this->out = new QSerialPort(port_out, this);
+
+		connect(in, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(ringErrorHandler(QSerialPort::SerialPortError)));
+		connect(out, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(ringErrorHandler(QSerialPort::SerialPortError)));
 		connect(this->in, &QSerialPort::readyRead, this, &DirectedTokenRing::qserialreadHandler);
 		int result = this->openPorts();
 		if (result)
@@ -67,4 +71,20 @@ void DirectedTokenRing::qserialreadHandler() {
 	// handle inc message
 
 	emit DirectedTokenRing::new_message(data);
+}
+
+void DirectedTokenRing::ringErrorHandler(QSerialPort::SerialPortError error) {
+	//9 - Device remove
+	if (int(error) == 9) {
+		//TODO: After release special frame, send it to "out"
+		DirectedTokenRing::network_disconnect();
+	}
+	//example for debug
+	/*QMessageBox msgBox;
+	msgBox.setWindowTitle("example");
+	msgBox.setText(QString::number((int)error));
+	msgBox.exec();
+	*/
+	//QMessageBox::information(thQMainWindow sd;is, "Connection status", (int)error); 
+	//ui.textBrowser->append(err);
 }

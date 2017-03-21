@@ -31,6 +31,7 @@ private:
 
 	QMap<quint8, QString> pa; // physical addresses
 
+	
 	int openPorts() {
 		if (!this->in->open(QIODevice::ReadOnly)) {
 			// Handle error
@@ -52,9 +53,6 @@ private:
 	}
 
 
-
-
-
 public:
 	DirectedTokenRing(QObject* parent);
 
@@ -74,6 +72,8 @@ public:
 
 private slots:
     void qserialreadHandler();
+	void ringErrorHandler(QSerialPort::SerialPortError);
+	//QSerialPort port
 
 signals:
 	void connectionOpen();
