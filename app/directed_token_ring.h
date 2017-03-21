@@ -4,7 +4,10 @@
 #ifndef DIRECTED_TOKEN_RING
 #define DIRECTED_TOKEN_RING
 
+
+#define FRAME_HEADER_SIZE 12
 #define MAX_DATA_SIZE 256 // in bytes
+#define MAX_FRAME_SIZE FRAME_HEADER_SIZE + MAX_DATA_SIZE
 #define START_BYTE 0x7E
 #define STOP_BYTE 0x7F
 
@@ -27,6 +30,7 @@ private:
 	Codec* codec = 0;
 
 	QVector<QByteArray> buffer_in;
+	bool full_frame_in = true;
 	QVector<QByteArray> buffer_out;
 
 	QMap<quint8, QString> pa; // physical addresses
@@ -46,6 +50,7 @@ private:
 	}
 
 	void createPhysicalAddress() {
+		// ToDo: динамическое обновление адресов
 		pa.insert(1, "Vladislav");
 		pa.insert(2, "Nikita");
 		pa.insert(3, "Anton");
@@ -70,7 +75,7 @@ public:
 	void setCodec(Codec* codec) { this->codec = codec; }
 
 	void send(QByteArray data);
-
+	QList<QString> get_contacts();
 
 private slots:
     void qserialreadHandler();

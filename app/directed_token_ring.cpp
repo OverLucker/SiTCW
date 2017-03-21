@@ -36,7 +36,8 @@ int DirectedTokenRing::network_disconnect() {
 
 void DirectedTokenRing::send(QByteArray data) {
 	// split to frames
-
+	if (data.length() > MAX_DATA_SIZE) {
+	}
 
 	// encode each frame
 	QByteArray encoded_data;
@@ -52,19 +53,56 @@ void DirectedTokenRing::send(QByteArray data) {
 void DirectedTokenRing::qserialreadHandler() {
 	QByteArray data = this->in->readAll();
 	// strip from start stop byte
-	
+
+	// assuming it working
+	while (data.length() > 0) {
+
+		// ѕытаемс€ найти начало кадра
+		//  адр полный и есть начало кадра
+		int st_byte_pos = data.indexOf(START_BYTE);
+		if (full_frame_in && st_byte_pos >= 0) {
+			// записываем как есть
+			int stop_byte_pos = data.indexOf(STOP_BYTE, st_byte_pos);
+			buffer_in.append(data.mid(st_byte_pos + 1, stop_byte_pos - st_byte_pos));
+			data = data.right(data.length() - stop_byte_pos - 1);
+			// Ќет конца кадра, но было начало
+			if (stop_byte_pos < 0)
+				full_frame_in = false;
+			continue;
+		}
+
+		int stop_byte_pos = data.indexOf(STOP_BYTE);
+		if (!full_frame_in && stop_byte_pos >= 0) {
+			buffer_in.last().append(data.left(stop_byte_pos));
+			data = data.right(data.length() - stop_byte_pos - 1);
+			full_frame_in = true;
+			continue;
+		}
+
+		data.clear();
+	}
+
+
+	if (!full_frame_in)
+		return;
 
 	// decode each frame
 	if (this->codec)
 		data = this->codec->decode(data);
 
-
-	//QByteArrayList frame_st = data.split(START_BYTE);
-
-
 	// merge all frames
+	data.clear();
+	for (auto i : buffer_in)
+		data.append(i);
+
+	buffer_in.clear();
 
 	// handle inc message
 
 	emit DirectedTokenRing::new_message(data);
+	
+}
+
+QList<QString> DirectedTokenRing::get_contacts() {
+	return pa.values();
 }

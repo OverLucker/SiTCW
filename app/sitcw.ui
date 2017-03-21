@@ -110,6 +110,9 @@
     <property name="batchSize">
      <number>300</number>
     </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
     <property name="selectionRectVisible">
      <bool>false</bool>
     </property>
@@ -260,16 +263,6 @@
     <property name="selectionRectVisible">
      <bool>false</bool>
     </property>
-    <item>
-     <property name="text">
-      <string>Псевдо контакт 1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Псевдо контакт 2</string>
-     </property>
-    </item>
    </widget>
    <widget class="QComboBox" name="netInputPortIn">
     <property name="geometry">

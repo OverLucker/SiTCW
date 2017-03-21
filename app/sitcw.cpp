@@ -20,7 +20,9 @@ SiTCW::SiTCW(QWidget *parent)
 		ui.netInputPortIn->insertItem(1000, item.portName(), 0);
 		ui.netInputPortOut->insertItem(1000, item.portName(), 0);
 	}
-		
+	
+	// ToDo: do it dynamically
+	ui.contactList->addItems(serial->get_contacts());
 	
 	connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
 	connect(serial, &PostSerial::errorOccured, this, &SiTCW::netError);
@@ -94,9 +96,12 @@ void SiTCW::SiTCW::add_item(){
 
 
 	// sending message
-	Message mess("Вася", "Anton", ui.messageTextInput->toPlainText());
-
-	serial->send_message(mess);
+	if (ui.contactList->currentItem()) {
+		QString to;
+		to = ui.contactList->currentItem()->text();
+		Message mess("Вася", to, ui.messageTextInput->toPlainText());
+		serial->send_message(mess);
+	}
 }
 
 void SiTCW::SiTCW::select_user(QListWidgetItem * item){
