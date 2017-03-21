@@ -117,6 +117,7 @@ void SiTCW::SiTCW::netConnect() {
 
 void SiTCW::SiTCW::netDisconnect() {
 	serial->network_disconnect();
+	QMessageBox::information(this, "Connection status", "Disconnected");
 }
 
 void SiTCW::SiTCW::connectionOpen() {
