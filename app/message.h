@@ -3,16 +3,17 @@
 
 #ifndef APP_LAYER_MESSAGE
 #define APP_LAYER_MESSAGE
+#include <QString>
 
 class Message {
 protected:
 	bool read;
-	std::string from;
-	std::string to;
-	std::string message;
+	QString from;
+	QString to;
+	QString message;
 
 public:
-	Message(std::string from, std::string to, std::string message) {
+	Message(QString from, QString to, QString message) {
 		this->read = false;
 		this->from = from;
 		this->to = to;
@@ -21,9 +22,9 @@ public:
 
 	// getters
 	bool is_read() { return this->read; }
-	std::string getSender() { return this->from; }
-	std::string getRecepient() { return this->to; }
-	std::string getMessage() { return this->message; }
+	QString getSender() { return this->from; }
+	QString getRecepient() { return this->to; }
+	QString getMessage() { return this->message; }
 };
 
 

@@ -39,12 +39,12 @@ void SiTCW::SiTCW::new_message(Message message){
     QVBoxLayout *MessageLayout= new QVBoxLayout();
 
     QLabel *MessageLabel = new QLabel(
-        QString::fromStdString(message.getSender()),
+        message.getSender(),
         ui.messageList
     );
 
     QLabel *MessageText = new QLabel(
-        QString::fromStdString(message.getMessage()),
+        message.getMessage(),
         ui.messageList
     );
 
@@ -94,7 +94,7 @@ void SiTCW::SiTCW::add_item(){
 
 
 	// sending message
-	Message mess("Вася", "Anton", ui.messageTextInput->toPlainText().toStdString());
+	Message mess("Вася", "Anton", ui.messageTextInput->toPlainText());
 
 	serial->send_message(mess);
 }
