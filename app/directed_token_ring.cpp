@@ -1,4 +1,4 @@
-#include "directed_token_ring.h"
+п»ї#include "directed_token_ring.h"
 #//include <QMessageBox>
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : QObject(parent) {
@@ -61,15 +61,15 @@ void DirectedTokenRing::qserialreadHandler() {
 	// assuming it working
 	while (data.length() > 0) {
 
-		// Пытаемся найти начало кадра
-		// Кадр полный и есть начало кадра
+		// РџС‹С‚Р°РµРјСЃСЏ РЅР°Р№С‚Рё РЅР°С‡Р°Р»Рѕ РєР°РґСЂР°
+		// РљР°РґСЂ РїРѕР»РЅС‹Р№ Рё РµСЃС‚СЊ РЅР°С‡Р°Р»Рѕ РєР°РґСЂР°
 		int st_byte_pos = data.indexOf(START_BYTE);
 		if (full_frame_in && st_byte_pos >= 0) {
-			// записываем как есть
+			// Р·Р°РїРёСЃС‹РІР°РµРј РєР°Рє РµСЃС‚СЊ
 			int stop_byte_pos = data.indexOf(STOP_BYTE, st_byte_pos);
 			buffer_in.append(data.mid(st_byte_pos + 1, stop_byte_pos - st_byte_pos));
 			data = data.right(data.length() - stop_byte_pos - 1);
-			// Нет конца кадра, но было начало
+			// РќРµС‚ РєРѕРЅС†Р° РєР°РґСЂР°, РЅРѕ Р±С‹Р»Рѕ РЅР°С‡Р°Р»Рѕ
 			if (stop_byte_pos < 0)
 				full_frame_in = false;
 			continue;
@@ -112,8 +112,7 @@ QList<QString> DirectedTokenRing::get_contacts() {
 }
 
 void DirectedTokenRing::ringErrorHandler(QSerialPort::SerialPortError error) {
-	//9 - Device remove
-	if (int(error) == 9) {
+	if (error == QSerialPort::SerialPortError::ResourceError) {
 		//TODO: After release special frame, send it to "out"
 		DirectedTokenRing::network_disconnect();
 	}
