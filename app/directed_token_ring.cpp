@@ -3,6 +3,7 @@
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
 	connect(this, &LowLevelClient::frame_ready, this, &DirectedTokenRing::frameReadyHandler);
+	connect(this, &LowLevelClient::connectionOpen, this, &DirectedTokenRing::onNetworkConnectionOpen);
 	createPhysicalAddress();
 }
 
@@ -19,14 +20,7 @@ void DirectedTokenRing::ringErrorHandler(LowLevelClientError error) {
 		//TODO: After release special frame, send it to "out"
 		DirectedTokenRing::network_disconnect();
 	}
-	//example for debug
-	/*QMessageBox msgBox;
-	msgBox.setWindowTitle("example");
-	msgBox.setText(QString::number((int)error));
-	msgBox.exec();
-	*/
-	//QMessageBox::information(thQMainWindow sd;is, "Connection status", (int)error); 
-	//ui.textBrowser->append(err);
+
 }
 
 void DirectedTokenRing::send(QByteArray data) {
@@ -38,5 +32,19 @@ void DirectedTokenRing::send(QByteArray data) {
 }
 
 void DirectedTokenRing::frameReadyHandler(QByteArray data) {
+	// decode with codec
+	if (this->codec)
+		data = codec->decode(data);
+
+	// ToDo: нужен обработчик кадров
+
 	emit new_message(data);
+}
+
+void DirectedTokenRing::onNetworkConnectionOpen() {
+	// обновим статус клиента
+	client_state = ClientState::Connected;
+	emit ClientStateChanged(client_state);
+
+	// ToDo: отправка кадра для знакомства
 }

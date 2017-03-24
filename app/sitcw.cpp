@@ -129,6 +129,6 @@ void SiTCW::SiTCW::connectionOpen() {
 	QMessageBox::information(this, "Connection status", "Success");
 }
 
-void SiTCW::SiTCW::netError(DirectedTokenRing::DirectedTokenRingError error) {
+void SiTCW::SiTCW::netError(LowLevelClient::LowLevelClientError error) {
 	QMessageBox::information(this, "Connection status", "Network error occured");
 }

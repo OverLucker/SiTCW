@@ -1,33 +1,56 @@
-#pragma once
+﻿#pragma once
 
 
 #ifndef DIRECTED_TOKEN_RING
 #define DIRECTED_TOKEN_RING
 
 
-#include <QDataStream>
-
 #include <QMap>
 #include "codec.h"
 #include <QVector>
-#include "wrappers\wrapper.h"
 #include "lowlevelclient.h"
 
 class DirectedTokenRing : public LowLevelClient {
 	Q_OBJECT
 private:
-	bool ready = false;
-	
-	Codec* codec = 0;
+
+	// свойства каждого клиента
+	//  1. адрес
+	//
+
+	quint8 local_address = 0;
+
+	// состояния каждого клиента 
+	//  1. не подключен
+	//  2. подключен, но не готов к передаче
+	//  3. подключен и готов к передаче
+	//
+
+	enum class ClientState {
+		NotConnected,
+		Connected,
+		Ready
+	};
+
+	ClientState client_state = ClientState::NotConnected;
+
+	// буферы
+	//  1. буфер входящих кадров
+	//  2. буфер исходящих кадров
+	//  3. буфер известных физических адресов и ящиков (логическая связь)
+	//
 
 	QVector<QByteArray> buffer_in;
-	
 	QVector<QByteArray> buffer_out;
+	QMap<quint8, QString> pa;
 
-	QMap<quint8, QString> pa; // physical addresses
+	// кодеки для шифровки и расшифровки сообщений
+	Codec * codec = 0;
+
+	
 
 	void createPhysicalAddress() {
-		// ToDo: ������������ ���������� �������
+		// ToDo: динамическое обновление адресов
 		pa.insert(1, "Vladislav");
 		pa.insert(2, "Nikita");
 		pa.insert(3, "Anton");
@@ -44,16 +67,19 @@ public:
 
 
 private slots:
+	void onNetworkConnectionOpen();
 	void frameReadyHandler(QByteArray);
 	void ringErrorHandler(LowLevelClientError);
 
 
 signals:
-	
+	void ClientStateChanged(ClientState new_state);
 	void new_message(QByteArray);
 	
 	
 };
+
+
 
 
 #endif // !DIRECTED_TOKEN_RING

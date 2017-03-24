@@ -21,7 +21,7 @@ private slots:
 	void netConnect();
 	void netDisconnect();
 	void connectionOpen();
-	void netError(DirectedTokenRing::DirectedTokenRingError);
+	void netError(LowLevelClient::LowLevelClientError);
 
 private:
 	Ui::SiTCWClass ui;
