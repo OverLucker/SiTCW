@@ -27,7 +27,7 @@ private:
 	QSerialPort* in = 0;
 	QSerialPort* out = 0;
 	bool ready = false;
-	Codec* codec = 0;
+	Codec<7>* codec = 0;
 
 	QVector<QByteArray> buffer_in;
 	bool full_frame_in = true;
@@ -70,7 +70,7 @@ public:
 	int network_connect(const QString& port_in, const QString& port_out);
 	int network_disconnect();
 
-	void setCodec(Codec* codec) { this->codec = codec; }
+	//void setCodec(Codec* codec) { this->codec = codec; }
 
 	void send(QByteArray data);
 	QList<QString> get_contacts();

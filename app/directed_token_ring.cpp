@@ -1,5 +1,5 @@
 ﻿#include "directed_token_ring.h"
-#//include <QMessageBox>
+#include <QMessageBox>
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : QObject(parent) {
 
@@ -47,7 +47,8 @@ void DirectedTokenRing::send(QByteArray data) {
 	QByteArray encoded_data;
 	if (this->codec)
 		encoded_data = this->codec->encode(data);
-
+	HammingCodec<7> CodecExemp;
+	data = CodecExemp.encode(data);
 	data.prepend(START_BYTE);
 	data.append(STOP_BYTE);
 	this->out->write(data);
@@ -91,18 +92,20 @@ void DirectedTokenRing::qserialreadHandler() {
 		return;
 
 	// decode each frame
-	if (this->codec)
-		data = this->codec->decode(data);
-
+	//if (this->codec)
+		//data = this->codec->decode(data);
 	// merge all frames
+
 	data.clear();
+	HammingCodec<7> CodecExemp;
 	for (auto i : buffer_in)
 		data.append(i);
+
+	data = CodecExemp.decode(data);
 
 	buffer_in.clear();
 
 	// handle inc message
-
 	emit DirectedTokenRing::new_message(data);
 	
 }
