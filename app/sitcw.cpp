@@ -15,7 +15,8 @@ SiTCW::SiTCW(QWidget *parent)
 	ui.setupUi(this);
 	
     serial = new PostSerial(this);
-
+	HammingCodec<7> codec;
+	serial->setCodec(new HammingCodec<7>());
 	for (auto item : QSerialPortInfo::availablePorts()) {
 		ui.netInputPortIn->insertItem(1000, item.portName(), 0);
 		ui.netInputPortOut->insertItem(1000, item.portName(), 0);

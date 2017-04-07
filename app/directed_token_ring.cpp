@@ -1,5 +1,5 @@
 ﻿#include "directed_token_ring.h"
-#//include <QMessageBox>
+#include <QMessageBox>
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
 	connect(this, &LowLevelClient::frame_ready, this, &DirectedTokenRing::frameReadyHandler);

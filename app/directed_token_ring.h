@@ -52,7 +52,9 @@ private:
 public:
 	DirectedTokenRing(QObject* parent);
 
+
 	void setCodec(Codec* codec) { this->codec = codec; }
+
 
 	void send(QByteArray data);
 	QList<QString> get_contacts();
