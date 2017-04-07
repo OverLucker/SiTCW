@@ -31,6 +31,7 @@ SiTCW::SiTCW(QWidget *parent)
 	connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
 	connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(netConnect()));
 	connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(netDisconnect()));
+	connect(ui.pbLogin, SIGNAL(released()), this, SLOT(login()));
 	
 }
 
@@ -99,7 +100,7 @@ void SiTCW::SiTCW::add_item(){
 	if (ui.contactList->currentItem()) {
 		QString to;
 		to = ui.contactList->currentItem()->text();
-		Message mess("Вася", to, ui.messageTextInput->toPlainText());
+		Message mess(to, ui.messageTextInput->toPlainText());
 		serial->send_message(mess);
 	}
 }
@@ -131,4 +132,11 @@ void SiTCW::SiTCW::connectionOpen() {
 
 void SiTCW::SiTCW::netError(LowLevelClient::LowLevelClientError error) {
 	QMessageBox::information(this, "Connection status", "Network error occured");
+}
+
+void SiTCW::SiTCW::login() {
+	if (!serial->login(ui.leLogin->text(), ui.lePass->text()))
+		QMessageBox::information(this, "Login failed", "Login failed!!!");
+	else
+		QMessageBox::information(this, "Login success", "Login success");
 }

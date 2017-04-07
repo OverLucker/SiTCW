@@ -235,9 +235,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>120</y>
+      <y>260</y>
       <width>291</width>
-      <height>441</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="focusPolicy">
@@ -282,6 +282,39 @@
       <width>141</width>
       <height>31</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="leLogin">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>140</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lePass">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>180</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbLogin">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>180</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Login</string>
     </property>
    </widget>
   </widget>

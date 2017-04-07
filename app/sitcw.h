@@ -22,6 +22,7 @@ private slots:
 	void netDisconnect();
 	void connectionOpen();
 	void netError(LowLevelClient::LowLevelClientError);
+	void login();
 
 private:
 	Ui::SiTCWClass ui;
