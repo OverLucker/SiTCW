@@ -20,6 +20,14 @@ public:
 		this->message = message;
 	}
 
+	// Отправитель может быть опущен
+	Message(const QString& to, const QString& message) {
+		this->read = false;
+		this->from = "";
+		this->to = to;
+		this->message = message;
+	}
+
 	// getters
 	bool is_read() { return this->read; }
 	QString getSender() { return this->from; }
