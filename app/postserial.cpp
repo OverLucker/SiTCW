@@ -1,4 +1,7 @@
 #include "postserial.h"
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QVariant>
 
 
 void PostSerial::readHandle(QByteArray data) {
@@ -15,7 +18,30 @@ void PostSerial::readHandle(QByteArray data) {
 
 
 int PostSerial::send_message(Message mess) {
-	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(mess.getSender(), mess.getRecepient(), mess.getMessage());
+	if (logged_username == QString())
+		return false;
+
+	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(logged_username, mess.getRecepient(), mess.getMessage());
 	this->send(data.toStdString().c_str());
+	return true;
+}
+
+bool PostSerial::login(QString username, QString pass) {
+	QSqlQuery query;
+	Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(username)));
+	if (query.first()) {
+		// there is a record
+		QString _id = query.value(0).toString();
+		QString username = query.value(1).toString();
+		QString real_pass = query.value(2).toString();
+		this->logged_username = username;
+		if (pass != real_pass)
+			return false;
+	}
+	else {
+		// register him
+		query.exec(QString("INSERT INTO users(username, password) VALUES ('%1', '%2');").arg(username, pass));
+		this->logged_username = username;
+	}
 	return true;
 }
