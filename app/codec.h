@@ -8,17 +8,16 @@
 #ifndef DATA_LINK_LAYER_CODEC
 #define DATA_LINK_LAYER_CODEC
 
-template <const int bitCount >
 class Codec {
 public:
-	virtual QByteArray& encode(const QByteArray& data, QByteArray& encodedData) = 0;
+	virtual QByteArray encode(const QByteArray& data) = 0;
 	//virtual const QByteArray& decode(const QByteArray& data, QByteArray& decodedData) = 0;
 	virtual QByteArray decode(const QByteArray& data) = 0;
 };
 
 
 template <const int bitCount>
-class HammingCodec : public Codec<bitCount> {
+class HammingCodec : public Codec {
 
 public:
 	// Õ¿◊¿À‹Õ€≈ ”—ÀŒ¬»ﬂ!!!
@@ -143,7 +142,7 @@ public:
 	QByteArray bitArrayToByteArray(QBitArray bits) {
 		// Resulting byte array
 			QByteArray bytes;
-			int maxSize = bitCount / 8 + 1;
+			int maxSize = bits.count() / 8 + 1;
 			bytes.resize(maxSize);
 			for (int i = 0; i < maxSize; i++)
 				bytes[i] = 0x00;
@@ -153,7 +152,8 @@ public:
 		return bytes;
 	}
 
-	virtual QByteArray& encode(const QByteArray& data, QByteArray& encodedData) {
+	virtual QByteArray encode(const QByteArray& data) {
+		QByteArray encodedData;
 		QBitArray dataBits = QByteArrayToBitArray(data);
 
 		if (int addingBites = dataBits.size() % baseWord) {

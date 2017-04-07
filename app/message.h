@@ -13,7 +13,7 @@ protected:
 	QString message;
 
 public:
-	Message(QString from, QString to, QString message) {
+	Message(const QString& from, const QString& to, const QString& message) {
 		this->read = false;
 		this->from = from;
 		this->to = to;

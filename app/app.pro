@@ -26,7 +26,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         sitcw.cpp \
     postserial.cpp \
-    directed_token_ring.cpp
+    directed_token_ring.cpp \
+    lowlevelclient.cpp
 
 HEADERS  += sitcw.h \
             app_layer.h \
@@ -34,6 +35,7 @@ HEADERS  += sitcw.h \
             physical_layer.h \
     postserial.h \
     message.h \
-    directed_token_ring.h
+    directed_token_ring.h \
+    lowlevelclient.h
 
 FORMS    += sitcw.ui

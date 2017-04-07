@@ -1,131 +1,51 @@
 ﻿#include "directed_token_ring.h"
 #include <QMessageBox>
 
-DirectedTokenRing::DirectedTokenRing(QObject* parent) : QObject(parent) {
-
+DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
+	connect(this, &LowLevelClient::frame_ready, this, &DirectedTokenRing::frameReadyHandler);
+	connect(this, &LowLevelClient::connectionOpen, this, &DirectedTokenRing::onNetworkConnectionOpen);
 	createPhysicalAddress();
 }
 
-int DirectedTokenRing::network_connect(const QString& port_in, const QString& port_out) {
-	if (!this->in && !this->out) {
-		this->in = new QSerialPort(port_in, this);
-		this->out = new QSerialPort(port_out, this);
-
-		connect(in, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(ringErrorHandler(QSerialPort::SerialPortError)));
-		connect(out, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(ringErrorHandler(QSerialPort::SerialPortError)));
-		connect(this->in, &QSerialPort::readyRead, this, &DirectedTokenRing::qserialreadHandler);
-		int result = this->openPorts();
-		if (result)
-			emit DirectedTokenRing::connectionOpen();
-		return result;
-	}
-	return 0;
-}
-
-int DirectedTokenRing::network_disconnect() {
-	if (this->in) {
-		this->in->disconnect();
-		this->in->close();
-	}
-	if (this->out) {
-		this->out->disconnect();
-		this->out->close();
-	}
-	this->in = 0;
-	this->out = 0;
-
-	emit connectionClosed();
-	return 0;
-}
-
-void DirectedTokenRing::send(QByteArray data) {
-	// split to frames
-	if (data.length() > MAX_DATA_SIZE) {
-	}
-
-	// encode each frame
-	QByteArray encodedData;
-	//if (this->codec)
-		//encoded_data = this->codec->encode(data);
-	HammingCodec<7> CodecExemp;
-	
-	data = CodecExemp.encode(data, encodedData);
-	data.prepend(START_BYTE);
-	data.append(STOP_BYTE);
-	this->out->write(data);
-}
 
 
-void DirectedTokenRing::qserialreadHandler() {
-	QByteArray data = this->in->readAll();
-	// strip from start stop byte
 
-	// assuming it working
-	while (data.length() > 0) {
-
-		// Пытаемся найти начало кадра
-		// Кадр полный и есть начало кадра
-		int st_byte_pos = data.indexOf(START_BYTE);
-		if (full_frame_in && st_byte_pos >= 0) {
-			// записываем как есть
-			int stop_byte_pos = data.indexOf(STOP_BYTE, st_byte_pos);
-			buffer_in.append(data.mid(st_byte_pos + 1, stop_byte_pos - st_byte_pos));
-			data = data.right(data.length() - stop_byte_pos - 1);
-			// Нет конца кадра, но было начало
-			if (stop_byte_pos < 0)
-				full_frame_in = false;
-			continue;
-		}
-
-		int stop_byte_pos = data.indexOf(STOP_BYTE);
-		if (!full_frame_in && stop_byte_pos >= 0) {
-			buffer_in.last().append(data.left(stop_byte_pos));
-			data = data.right(data.length() - stop_byte_pos - 1);
-			full_frame_in = true;
-			continue;
-		}
-
-		data.clear();
-	}
-
-
-	if (!full_frame_in)
-		return;
-
-	// decode each frame
-	//if (this->codec)
-		//data = this->codec->decode(data);
-	// merge all frames
-
-	data.clear();
-	HammingCodec<7> CodecExemp;
-	for (auto i : buffer_in)
-		data.append(i);
-	QByteArray decodedData;
-	decodedData = CodecExemp.decode(data);
-
-	buffer_in.clear();
-
-	// handle inc message
-	emit DirectedTokenRing::new_message(decodedData);
-	
-}
 
 QList<QString> DirectedTokenRing::get_contacts() {
 	return pa.values();
 }
 
-void DirectedTokenRing::ringErrorHandler(QSerialPort::SerialPortError error) {
-	if (error == QSerialPort::SerialPortError::ResourceError) {
+void DirectedTokenRing::ringErrorHandler(LowLevelClientError error) {
+	if (error == LowLevelClientError::ConnectionClosed) {
 		//TODO: After release special frame, send it to "out"
 		DirectedTokenRing::network_disconnect();
 	}
-	//example for debug
-	/*QMessageBox msgBox;
-	msgBox.setWindowTitle("example");
-	msgBox.setText(QString::number((int)error));
-	msgBox.exec();
-	*/
-	//QMessageBox::information(thQMainWindow sd;is, "Connection status", (int)error); 
-	//ui.textBrowser->append(err);
+
+}
+
+void DirectedTokenRing::send(QByteArray data) {
+
+	// encode with codec
+	if (this->codec)
+		data = codec->encode(data);
+
+	LowLevelClient::send(data);
+}
+
+void DirectedTokenRing::frameReadyHandler(QByteArray data) {
+	// decode with codec
+	if (this->codec)
+		data = codec->decode(data);
+
+	// ToDo: нужен обработчик кадров
+
+	emit new_message(data);
+}
+
+void DirectedTokenRing::onNetworkConnectionOpen() {
+	// обновим статус клиента
+	client_state = ClientState::Connected;
+	emit ClientStateChanged(client_state);
+
+	// ToDo: отправка кадра для знакомства
 }

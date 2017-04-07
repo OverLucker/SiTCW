@@ -21,8 +21,8 @@ void PostSerial::readHandle(QByteArray data) {
 
 
 int PostSerial::send_message(Message mess) {
-	//QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(mess.getSender(), mess.getRecepient(), mess.getMessage());
-	QString data = QString("1");
+	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(mess.getSender(), mess.getRecepient(), mess.getMessage());
+	//QString data = QString("1");
 	this->send(data.toStdString().c_str());
 	return true;
 }
