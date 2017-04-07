@@ -9,6 +9,9 @@ debug/
 Debug/
 Release/
 
+# program generated files
+db.sqlite3
+
 # Not sure if we should ignore it
 *.pro.user
 
