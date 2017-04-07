@@ -4,7 +4,6 @@
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
 	connect(this, &LowLevelClient::frame_ready, this, &DirectedTokenRing::frameReadyHandler);
 	connect(this, &LowLevelClient::connectionOpen, this, &DirectedTokenRing::onNetworkConnectionOpen);
-	createPhysicalAddress();
 }
 
 
@@ -23,12 +22,19 @@ void DirectedTokenRing::ringErrorHandler(LowLevelClientError error) {
 
 }
 
-void DirectedTokenRing::send(QByteArray data) {
+void DirectedTokenRing::send_frame(QByteArray data) {
 	// encode with codec
 	if (this->codec)
 		data = codec->encode(data);
 
 	LowLevelClient::send(data);
+}
+
+void DirectedTokenRing::send(QByteArray data) {
+	// Функционал этой процедуры был перемещен в DirectedTokenRing::send_frame
+	//  в связи с количеством вызовов и общностью использования
+	//  теперь эта процедура отвечает за отправку информационных кадров
+	send_frame(data);
 }
 
 void DirectedTokenRing::frameReadyHandler(QByteArray data) {
@@ -37,6 +43,8 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 		data = codec->decode(data);
 
 	// ToDo: нужен обработчик кадров
+
+
 
 	emit new_message(data);
 }

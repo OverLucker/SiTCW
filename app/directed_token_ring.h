@@ -47,16 +47,8 @@ private:
 	// кодеки для шифровки и расшифровки сообщений
 	Codec * codec = 0;
 
-	
 
-	void createPhysicalAddress() {
-		// ToDo: динамическое обновление адресов
-		pa.insert(1, "Vladislav");
-		pa.insert(2, "Nikita");
-		pa.insert(3, "Anton");
-	}
-
-
+	void send_frame(QByteArray data);
 public:
 	DirectedTokenRing(QObject* parent);
 
