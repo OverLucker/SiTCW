@@ -12,6 +12,70 @@
 #include "physical_layer.h"
 #include <vector>
 #include <QDataStream>
+#include <QMap>
+
+
+enum class SuperVisorFrameTypes {
+	Meeting,
+	Disconnect,
+	Login,
+	Logout
+};
+
+
+
+#define FRAME_HEADER_SIZE 12
+#define MAX_DATA_SIZE 256 // in bytes
+#define MAX_FRAME_SIZE FRAME_HEADER_SIZE + MAX_DATA_SIZE
+#define FRAME_SECURE_BYTE 0x7E
+
+enum class FrameType {
+	SuperVisor = 1,
+	Information = 2,
+	Token = 3,
+};
+
+struct Frame {
+	FrameType frame_type;
+	bool last_frame;
+	quint8 frame_header_size;
+	quint8 frame_secure;
+	quint8 sender;
+	quint8 recipients_number;
+	quint8 recipients[14];
+	quint8 data_size;
+	char data[MAX_DATA_SIZE];
+};
+
+namespace Handlers {
+	class FrameHandler {
+		public:
+			virtual bool handle(const Frame& frame) = 0;
+
+		operator QByteArray()const {
+
+		}
+	};
+
+	class SuperVisorHandler {
+
+	};
+
+	class InformationHandler {
+
+	};
+
+	class TokenHandler {
+
+	};
+}
+
+
+
+
+
+
+
 
 /*
 typedef unsigned char uchar; 
@@ -21,25 +85,14 @@ const int TOKEN_MAX_TIMEOUT = 15;
 
 
 
-enum class FrameType {
-	SuperVisor = 1,
-	Information = 2,
-	Token = 3,
-};
+
 
 
 class Frame {
 	// This class is immutable. It just contains gathered info
 
 private:
-	FrameType frame_type;
-	bool last_frame;
-	quint8 frame_header_size;
-	quint8 frame_secure;
-	quint8 sender;
-	std::vector<quint8> recipients;
-	quint8 data_size;
-	char * data;
+	
 
 	
 
