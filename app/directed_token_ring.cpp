@@ -44,11 +44,12 @@ void DirectedTokenRing::send(QByteArray data) {
 	}
 
 	// encode each frame
-	QByteArray encoded_data;
-	if (this->codec)
-		encoded_data = this->codec->encode(data);
+	QByteArray encodedData;
+	//if (this->codec)
+		//encoded_data = this->codec->encode(data);
 	HammingCodec<7> CodecExemp;
-	data = CodecExemp.encode(data);
+	
+	data = CodecExemp.encode(data, encodedData);
 	data.prepend(START_BYTE);
 	data.append(STOP_BYTE);
 	this->out->write(data);
@@ -100,13 +101,13 @@ void DirectedTokenRing::qserialreadHandler() {
 	HammingCodec<7> CodecExemp;
 	for (auto i : buffer_in)
 		data.append(i);
-
-	data = CodecExemp.decode(data);
+	QByteArray decodedData;
+	decodedData = CodecExemp.decode(data);
 
 	buffer_in.clear();
 
 	// handle inc message
-	emit DirectedTokenRing::new_message(data);
+	emit DirectedTokenRing::new_message(decodedData);
 	
 }
 

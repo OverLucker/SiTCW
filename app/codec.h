@@ -2,6 +2,7 @@
 #pragma once
 #include <bitset>
 #include <QBitArray>
+#include <string>
 
 
 #ifndef DATA_LINK_LAYER_CODEC
@@ -10,8 +11,9 @@
 template <const int bitCount >
 class Codec {
 public:
-	virtual const QByteArray& encode(const QByteArray& data) = 0;
-	virtual const QByteArray& decode(const QByteArray& data) = 0;
+	virtual QByteArray& encode(const QByteArray& data, QByteArray& encodedData) = 0;
+	//virtual const QByteArray& decode(const QByteArray& data, QByteArray& decodedData) = 0;
+	virtual QByteArray decode(const QByteArray& data) = 0;
 };
 
 
@@ -54,6 +56,32 @@ public:
 		return err;
 	}
 
+	bitmap decode_full_vectore (bitmap src) {
+		int err
+
+		for (int i = 0, o = 0; i < bitCount; ++i)
+		{
+			if (bit_count(bitmap(i + 1)) <= 1)
+				continue;
+			ans[i] = src[o++];
+		}
+
+	}
+
+	bool check_for_error(QBitArray src) {
+		int sum = 0;
+		for (int i = 0; i < bitCount; ++i)
+		{
+			/*if (bit_count(bitmap(i + 1)) == 1 && src[bitCount - i-1]) {
+				err = true;
+				break;
+			}*/
+			if (src[bitCount -i-1])
+				sum ^= (i + 1);
+		}
+		bool err = sum>0;
+		return err;
+	}
 
 	// Располагает биты в правильном порядке в векторе
 	bitmap gen_full_vector(bitmap src)
@@ -66,7 +94,7 @@ public:
 				continue;
 			ans[i] = src[o++];
 		}
-
+	
 		// расставим биты по местам
 		int err = control_sum(ans);
 		for (int tmp = 1; tmp < bitCount; tmp = tmp << 1)
@@ -111,8 +139,21 @@ public:
 		}
 		return byteArray;
 	}
+	
+	QByteArray bitArrayToByteArray(QBitArray bits) {
+		// Resulting byte array
+			QByteArray bytes;
+			int maxSize = bitCount / 8 + 1;
+			bytes.resize(maxSize);
+			for (int i = 0; i < maxSize; i++)
+				bytes[i] = 0x00;
+		// Convert from QBitArray to QByteArray
+		for (int b = 0; b<bits.count(); ++b)
+			bytes[b / 8] = (bytes.at(b / 8) | ((bits[b] ? 1 : 0) << (7 - (b % 8))));
+		return bytes;
+	}
 
-	virtual const QByteArray& encode(const QByteArray& data) {
+	virtual QByteArray& encode(const QByteArray& data, QByteArray& encodedData) {
 		QBitArray dataBits = QByteArrayToBitArray(data);
 
 		if (int addingBites = dataBits.size() % baseWord) {
@@ -120,8 +161,7 @@ public:
 		}
 
 		int length = dataBits.size();
-		QByteArray encodedData;
-
+		encodedData = "";
 
 		for (int i = 0; i < length; i+=baseWord) {
 			char* word = new char[baseWord+1];
@@ -133,17 +173,53 @@ public:
 			bitmap fullVector = gen_full_vector(myVec);
 			QByteArray encodedWord = bitsetToByteArray(fullVector);
 			//QByteArray encodedWord = bitsetToByteArray(myVec);
-			encodedData.append(encodedWord);
+			encodedData.append((char)fullVector.to_ulong());
 			delete[] word;
-
 		}
-
-		return data;
+		//data = encodedData;
+		return encodedData;
 	}
+	QBitArray getMeaningBits(QBitArray word) {
+		QBitArray meaningBits(baseWord);
+		for (int i = 0, o=baseWord-1; i < bitCount; ++i)
+		{
+			if (bit_count(bitmap(i + 1)) != 1) {
+				meaningBits[o--] = word[bitCount - i - 1];
+			}
+		}
+		return meaningBits;
+	}
+	
+	virtual QByteArray decode(const QByteArray& data) {
+		QBitArray dataBits = QByteArrayToBitArray(data);
+		int length = dataBits.size();
+		QByteArray decodedData;
+		//all crash
+		QBitArray decodedDataInBits(length / bitCount*baseWord);
+		int currentWordNumber = 0;
+		for (int i = 0; i < length; i += 8) {
+			
+			QBitArray word(bitCount);
+			//bitcount>8 all crash
+			for (int j = 8-bitCount, o=0; j <= bitCount; j++) {
+				if (dataBits[i + j])
+					word.setBit(o);
+				o++;
+			}
 
-	virtual const QByteArray& decode(const QByteArray& data) {
-
-		return data;
+			if (check_for_error(word)) {
+				decodedData = "";
+				break;
+			}
+			QBitArray decodedBits = getMeaningBits(word);
+			//QByteArray encodedWord = bitsetToByteArray(myVec);
+			for (int j = 0; j < baseWord; j++)
+				decodedDataInBits[baseWord*currentWordNumber + j] = decodedBits[j];
+			currentWordNumber++;
+		}
+		decodedData = bitArrayToByteArray(decodedDataInBits);
+		//data = decodedData;
+		return QByteArray(decodedData);
 	}
 };
 
