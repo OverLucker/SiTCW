@@ -41,13 +41,13 @@ public:
 		query.exec("CREATE TABLE IF NOT EXISTS postbox( message_id INTEGER PRIMARY KEY AUTOINCREMENT,\
 														sender INTEGER NOT NULL,\
 														recipient INTEGER NOT NULL,\
-														message TEXT NOT NULL );");
+														message TEXT NOT NULL,\
+														status INTEGER NOT NULL );");
 
 	}
 	
+	QString get_current_logged_user();
 	int send_message(Message message);
-	int send_user_login(const QString& username);
-	int send_user_logout(const QString& username);
 	int notify_message_read(Message& message);
 
 public slots:

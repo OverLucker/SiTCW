@@ -50,5 +50,10 @@ bool PostSerial::login(QString username, QString pass) {
 		query.exec(QString("INSERT INTO users(username, password) VALUES ('%1', '%2');").arg(username, pass));
 		this->logged_username = username;
 	}
+	this->send_user_login(username);
 	return true;
+}
+
+QString PostSerial::get_current_logged_user() {
+	return this->logged_username;
 }

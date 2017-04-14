@@ -22,21 +22,24 @@ SiTCW::SiTCW(QWidget *parent)
 		ui.netInputPortOut->insertItem(1000, item.portName(), 0);
 	}
 	
-	// ToDo: do it dynamically
-	ui.contactList->addItems(serial->get_contacts());
-	
+	// connection events
 	connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
 	connect(serial, &PostSerial::errorOccured, this, &SiTCW::netError);
+
+	// address book events
+	connect(serial, &DirectedTokenRing::userLoggedIn, this, &SiTCW::addressBookAdd);
+	connect(serial, &DirectedTokenRing::userLoggedOut, this, &SiTCW::addressBookRemove);
+
 	connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
 	connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
 	connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
 	connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(netConnect()));
 	connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(netDisconnect()));
 	connect(ui.pbLogin, SIGNAL(released()), this, SLOT(login()));
+
+
 	
 }
-
-
 
 void SiTCW::SiTCW::new_message(Message message){
 
@@ -72,12 +75,11 @@ void SiTCW::SiTCW::new_message(Message message){
     // ... insert in database...
 }
 
-
 void SiTCW::SiTCW::add_item(){
 
     QVBoxLayout *MessageLayout= new QVBoxLayout();
 
-    QLabel *MessageLabel = new QLabel("Вася", ui.messageList);
+    QLabel *MessageLabel = new QLabel(serial->get_current_logged_user(), ui.messageList);
     QLabel *MessageText = new QLabel(ui.messageTextInput->toPlainText(), ui.messageList);
     MessageLabel->setStyleSheet("font-weight: bold");
     MessageText->setMaximumWidth(601);
@@ -140,4 +142,12 @@ void SiTCW::SiTCW::login() {
 		QMessageBox::information(this, "Login failed", "Login failed!!!");
 	else
 		QMessageBox::information(this, "Login success", "Login success");
+}
+
+void SiTCW::SiTCW::addressBookAdd(QString username) {
+	ui.contactList->addItem(username);
+}
+
+void SiTCW::SiTCW::addressBookRemove(QString username) {
+	ui.contactList->removeItemWidget(ui.contactList->findItems(username, Qt::MatchExactly)[0]);
 }

@@ -23,6 +23,8 @@ private slots:
 	void connectionOpen();
 	void netError(LowLevelClient::LowLevelClientError);
 	void login();
+	void addressBookAdd(QString username);
+	void addressBookRemove(QString username);
 
 private:
 	Ui::SiTCWClass ui;
