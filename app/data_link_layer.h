@@ -162,7 +162,7 @@ public:
 				recipients.append((data[i + 3] & 0x0F));
 		}
 		return Frame(
-			FrameType(data[0] >> 6), // frame_type
+			FrameType((quint8)data[0] >> 6), // frame_type
 			data[0] & 0x20, // last_frame
 			(data[2] & 0xF0) >> 4, // sender
 			recipients,

@@ -16,9 +16,14 @@ private:
 
 	// свойства каждого клиента
 	//  1. адрес
+	//  2. число для определения первенства
+	//  3. первоначальное предположение адреса
 	//
 
 	quint8 local_address = 0;
+	quint8 def_number = 0;
+	quint8 app_address = 0;
+	quint8 second_round = 0;
 
 	// состояния каждого клиента 
 	//  1. не подключен
@@ -55,9 +60,11 @@ public:
 
 	void setCodec(Codec* codec) { this->codec = codec; }
 
-
 	void send(QByteArray data);
+	void send_user_login(const QString& username);
+	void send_user_logout(const QString& username);
 	QList<QString> get_contacts();
+
 
 
 private slots:
@@ -69,6 +76,8 @@ private slots:
 signals:
 	void ClientStateChanged(ClientState new_state);
 	void new_message(QByteArray);
+	void userLoggedIn(QString username);
+	void userLoggedOut(QString username);
 	
 	
 };
