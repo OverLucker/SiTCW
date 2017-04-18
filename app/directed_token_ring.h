@@ -24,6 +24,7 @@ private:
 	quint8 def_number = 0;
 	quint8 app_address = 0;
 	quint8 second_round = 0;
+	QVector<quint8> known_numbers;
 
 	// состояния каждого клиента 
 	//  1. не подключен

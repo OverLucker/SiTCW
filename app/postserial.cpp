@@ -1,6 +1,6 @@
 #include "postserial.h"
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlQuery>
+#include <QtSql/QSql>
+
 #include <QVariant>
 
 
@@ -34,7 +34,7 @@ int PostSerial::send_message(Message mess) {
 }
 
 bool PostSerial::login(QString username, QString pass) {
-	QSqlQuery query;
+    QSqlQuery query;
 	Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(username)));
 	if (query.first()) {
 		// there is a record

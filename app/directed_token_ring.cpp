@@ -1,8 +1,9 @@
 ﻿#include "directed_token_ring.h"
 #include "data_link_layer.h"
 #include <QMessageBox>
-
+#include <algorithm>
 #include <time.h>
+
 
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
@@ -60,41 +61,34 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 
 	if (f.getFrameType() == FrameType::SuperVisor) {
 		QByteArray fr_data = f.getData();
-		if ((quint8)fr_data[0] == (quint8)SuperVisorFrameTypes::Meeting) {
-			QVector<quint8> def_numbers;
-			if (app_address && def_number) {
-				for (int i = 1; fr_data.at(i) != 0; i += 2) {
-					if (fr_data.at(i) == app_address && fr_data.at(i + 1) == def_number)
-						if (second_round)
-							return;
-						local_address = app_address;
-						send_frame(FrameBuilder::makeSupervisorFrame(local_address, fr_data));
-						second_round = true;
-						return;
-					def_numbers.append(fr_data.at(i + 1));
-				}
+		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)fr_data[0]);
+		if (fr_type == SuperVisorFrameTypes::Meeting) {
+			quint8 inc_num = fr_data[1];
+			if (inc_num == def_number)
+				return;
 
-			}
-			
-			app_address = fr_data.at(fr_data.length() - 2) + 1;
-			fr_data.append(app_address);
-			def_number = rand() % 254 + 1;
-			while(def_numbers.indexOf(def_number))
-				def_number = rand() % 254 + 1;
+			if (known_numbers.indexOf(inc_num) < 0)
+				known_numbers.append(inc_num);
 
-			fr_data.append(def_number);
-			send_frame(FrameBuilder::makeSupervisorFrame(local_address, fr_data));
-			
+			std::sort(known_numbers.begin(), known_numbers.end());
+			local_address = known_numbers.indexOf(def_number) + 1;
+
+			send_frame(f);
+			return;
 		}
-		if ((quint8)f.getData()[0] == (quint8)SuperVisorFrameTypes::Login) {
+		if (fr_type == SuperVisorFrameTypes::Login) {
 			QString username = f.getData().mid(2);
 			pa[f.getData()[1]] = username;
-			emit userLoggedIn(username.append(48+f.getData()[1]));
+			emit userLoggedIn(username);
 		}
+		
 	}
 	else
 		if (f.getFrameType() == FrameType::Information)
 			emit new_message(f.getData());
+
+	if (f.getSender() != local_address)
+		send_frame(data);
 }
 
 void DirectedTokenRing::onNetworkConnectionOpen() {
@@ -105,11 +99,10 @@ void DirectedTokenRing::onNetworkConnectionOpen() {
 	// ToDo: отправка кадра для знакомства
 	QByteArray data;
 	data.append((quint8)SuperVisorFrameTypes::Meeting);
-	app_address = 1;
-	data.append(app_address);
 
 	qsrand(time(NULL));
 	def_number = qrand() % 254 + 1; // 1 - 255
 	data.append(def_number);
+	known_numbers.append(def_number);
 	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
 }
