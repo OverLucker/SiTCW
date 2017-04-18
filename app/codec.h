@@ -33,6 +33,7 @@ public:
 
 	HammingCodec() {
 	}
+
 	// подсчитывает кол-во 1 битов в числе
 	int bit_count(bitmap& src)
 	{
@@ -160,10 +161,9 @@ public:
 			dataBits.resize(dataBits.size() + addingBites);
 		}
 
-		int length = dataBits.size();
 		encodedData = "";
 
-		for (int i = 0; i < length; i+=baseWord) {
+		for (int i = 0, length = dataBits.size(); i < length; i+=baseWord) {
 			char* word = new char[baseWord+1];
 			for (int j = 0; j < baseWord; j++) {
 				word[j] = dataBits[i + j] ? '1' : '0';
@@ -179,6 +179,7 @@ public:
 		//data = encodedData;
 		return encodedData;
 	}
+
 	QBitArray getMeaningBits(QBitArray word) {
 		QBitArray meaningBits(baseWord);
 		for (int i = 0, o=baseWord-1; i < bitCount; ++i)
@@ -193,13 +194,15 @@ public:
 	virtual QByteArray decode(const QByteArray& data) {
 		QBitArray dataBits = QByteArrayToBitArray(data);
 		int length = dataBits.size();
-		QByteArray decodedData;
+
 		//all crash
 		QBitArray decodedDataInBits(length / bitCount*baseWord);
 		int currentWordNumber = 0;
 		for (int i = 0; i < length; i += 8) {
 			
 			QBitArray word(bitCount);
+			// works only for 7 bit mode !!!
+		
 			//bitcount>8 all crash
 			for (int j = 8-bitCount, o=0; j <= bitCount; j++) {
 				if (dataBits[i + j])
@@ -208,18 +211,17 @@ public:
 			}
 
 			if (check_for_error(word)) {
-				decodedData = "";
-				break;
+				return QByteArray();
 			}
+
 			QBitArray decodedBits = getMeaningBits(word);
 			//QByteArray encodedWord = bitsetToByteArray(myVec);
 			for (int j = 0; j < baseWord; j++)
 				decodedDataInBits[baseWord*currentWordNumber + j] = decodedBits[j];
 			currentWordNumber++;
 		}
-		decodedData = bitArrayToByteArray(decodedDataInBits);
-		//data = decodedData;
-		return QByteArray(decodedData);
+
+		return bitArrayToByteArray(decodedDataInBits);
 	}
 };
 
