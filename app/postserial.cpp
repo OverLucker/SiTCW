@@ -28,8 +28,9 @@ int PostSerial::send_message(Message mess) {
 		return false;
 
 	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(logged_username, mess.getRecepient(), mess.getMessage());
-
-	this->send(data.toStdString().c_str());
+	QVector<QString> recs;
+	recs.append(mess.getRecepient());
+	this->send(data.toStdString().c_str(), recs);
 	return true;
 }
 

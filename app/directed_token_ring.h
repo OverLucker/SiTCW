@@ -61,7 +61,7 @@ public:
 
 	void setCodec(Codec* codec) { this->codec = codec; }
 
-	void send(QByteArray data);
+	void send(QByteArray data, QVector<QString> recipients);
 	void send_user_login(const QString& username);
 	void send_user_logout(const QString& username);
 	QList<QString> get_contacts();

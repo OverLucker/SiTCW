@@ -31,13 +31,29 @@ void DirectedTokenRing::send_frame(QByteArray data) {
 	LowLevelClient::send(data);
 }
 
-void DirectedTokenRing::send(QByteArray data) {
+void DirectedTokenRing::send(QByteArray data, QVector<QString> recipients) {
 	// Функционал этой процедуры был перемещен в DirectedTokenRing::send_frame
 	//  в связи с количеством вызовов и общностью использования
 	//  теперь эта процедура отвечает за отправку информационных кадров
 	QVector<quint8> rec;
-	rec.append(1);
+	for (auto it : recipients) {
+		rec.append(pa.key(it));
+		/*for (auto val : pa.values()) {
+			if (val == it) {
+				rec.append(pa.key(val));
+			}
+		}*/
+	}
+	
 	send_frame(FrameBuilder::makeInformationFrame(local_address, rec, data));
+}
+
+void DirectedTokenRing::send_user_logout(const QString& username) {
+	QByteArray data;
+	data.append((quint8)SuperVisorFrameTypes::Logout);
+	data.append(local_address);
+	data.append(username);
+	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
 }
 
 void DirectedTokenRing::send_user_login(const QString& username) {
@@ -58,9 +74,10 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 		return;
 
 	Frame f = FrameBuilder::fromByteArray(data);
+	QByteArray fr_data = f.getData();
 
 	if (f.getFrameType() == FrameType::SuperVisor) {
-		QByteArray fr_data = f.getData();
+		
 		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)fr_data[0]);
 		if (fr_type == SuperVisorFrameTypes::Meeting) {
 			quint8 inc_num = fr_data[1];
@@ -76,16 +93,24 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 			send_frame(f);
 			return;
 		}
+
 		if (fr_type == SuperVisorFrameTypes::Login) {
-			QString username = f.getData().mid(2);
-			pa[f.getData()[1]] = username;
+			QString username = fr_data.mid(2);
+			pa[fr_data[1]] = username;
 			emit userLoggedIn(username);
+		}
+
+		if (fr_type == SuperVisorFrameTypes::Logout) {
+			pa.remove(fr_data[1]);
+			QString username = fr_data.mid(2);
+			emit userLoggedOut(username);
 		}
 		
 	}
-	else
-		if (f.getFrameType() == FrameType::Information)
-			emit new_message(f.getData());
+	if (f.getFrameType() == FrameType::Information) {
+		if (f.getRecipients().indexOf(local_address) >= 0)
+				emit new_message(f.getData());
+	}
 
 	if (f.getSender() != local_address)
 		send_frame(data);
