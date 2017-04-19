@@ -52,6 +52,7 @@ public:
 
 public slots:
 	bool login(QString username, QString pass);
+	void logout(QString username);
 
 signals:
 	void new_message(Message message);

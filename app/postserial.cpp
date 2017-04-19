@@ -55,6 +55,11 @@ bool PostSerial::login(QString username, QString pass) {
 	return true;
 }
 
+void PostSerial::logout(QString username) {
+	this->logged_username.clear();
+	this->send_user_logout(username);
+}
+
 QString PostSerial::get_current_logged_user() {
 	return this->logged_username;
 }

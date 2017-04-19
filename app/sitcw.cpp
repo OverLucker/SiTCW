@@ -25,20 +25,23 @@ SiTCW::SiTCW(QWidget *parent)
 	// connection events
 	connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
 	connect(serial, &PostSerial::errorOccured, this, &SiTCW::netError);
+	connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(netConnect()));
+	connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(netDisconnect()));
+
 
 	// address book events
 	connect(serial, &DirectedTokenRing::userLoggedIn, this, &SiTCW::addressBookAdd);
 	connect(serial, &DirectedTokenRing::userLoggedOut, this, &SiTCW::addressBookRemove);
 
+	// user events
+	connect(ui.pbLogin, SIGNAL(released()), this, SLOT(login()));
+	connect(ui.pbLogout, SIGNAL(released()), this, SLOT(logout()));
+
+	// message events
 	connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
 	connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
 	connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
-	connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(netConnect()));
-	connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(netDisconnect()));
-	connect(ui.pbLogin, SIGNAL(released()), this, SLOT(login()));
 
-
-	
 }
 
 void SiTCW::SiTCW::display_message(Message& message) {
@@ -133,6 +136,11 @@ void SiTCW::SiTCW::login() {
 		QMessageBox::information(this, "Login failed", "Login failed!!!");
 	else
 		QMessageBox::information(this, "Login success", "Login success");
+}
+
+void SiTCW::SiTCW::logout() {
+	serial->logout(serial->get_current_logged_user());
+	ui.statusBar->showMessage("Выход из сети");
 }
 
 void SiTCW::SiTCW::addressBookAdd(QString username) {

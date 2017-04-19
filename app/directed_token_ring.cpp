@@ -36,14 +36,8 @@ void DirectedTokenRing::send(QByteArray data, QVector<QString> recipients) {
 	//  в связи с количеством вызовов и общностью использования
 	//  теперь эта процедура отвечает за отправку информационных кадров
 	QVector<quint8> rec;
-	for (auto it : recipients) {
+	for (auto it : recipients)
 		rec.append(pa.key(it));
-		/*for (auto val : pa.values()) {
-			if (val == it) {
-				rec.append(pa.key(val));
-			}
-		}*/
-	}
 	
 	send_frame(FrameBuilder::makeInformationFrame(local_address, rec, data));
 }

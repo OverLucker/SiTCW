@@ -26,6 +26,7 @@ private slots:
 	void connectionOpen();
 	void netError(LowLevelClient::LowLevelClientError);
 	void login();
+	void logout();
 	void addressBookAdd(QString username);
 	void addressBookRemove(QString username);
 
