@@ -54,7 +54,7 @@ void SiTCW::SiTCW::display_message(Message& message) {
 		QString("%1: %2").arg("TO", message.getRecepient()),
 		ui.messageList
 	);
-	MessageSender->setStyleSheet("font-weight: bold; text-align: right;");
+	MessageRecipient->setStyleSheet("font-weight: bold; text-align: right;");
 
 	MessageLayout->addWidget(MessageSender, 0, 0);
 	MessageLayout->addWidget(MessageRecipient, 0, 1);
@@ -91,7 +91,7 @@ void SiTCW::SiTCW::add_item(){
 	// sending message
 	if (ui.contactList->currentItem()) {
 		QString to = ui.contactList->currentItem()->text();
-		Message mess(to, ui.messageTextInput->toPlainText());
+		Message mess(serial->get_current_logged_user(), to, ui.messageTextInput->toPlainText());
 		serial->send_message(mess);
 		display_message(mess);
 		// clear input

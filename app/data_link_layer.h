@@ -157,13 +157,13 @@ public:
 		QVector<quint8> recipients;
 		quint8 rec_count = (data[2] & 0x0F);
 		for (quint8 i = 0, all = rec_count / 2; i < all; ++i) {
-			if ((data[i + 3] & 0xF0 >> 4) > 0)
+			if (((data[i + 3] & 0xF0) >> 4) > 0)
 				recipients.append((data[i + 3] & 0xF0) >> 4);
 			if((data[i + 3] & 0x0F) > 0)
 				recipients.append((data[i + 3] & 0x0F));
 		}
 		if (rec_count % 2)
-			recipients.append(data[rec_count / 2 + 3] & 0xF0 >> 4);
+			recipients.append((data[rec_count / 2 + 3] & 0xF0) >> 4);
 
 		return Frame(
 			FrameType((quint8)data[0] >> 6), // frame_type
