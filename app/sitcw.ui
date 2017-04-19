@@ -90,6 +90,24 @@
       <height>481</height>
      </rect>
     </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>8</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>640</width>
+      <height>480</height>
+     </size>
+    </property>
+    <property name="sizeIncrement">
+     <size>
+      <width>10</width>
+      <height>10</height>
+     </size>
+    </property>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
     </property>
@@ -102,10 +120,26 @@
 	background-color: #eee;
 	padding: 10px;
 	border-radius: 8px;
+	height: calc(100% - 100px);
 }</string>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="verticalScrollMode">
+     <enum>QAbstractItemView::ScrollPerPixel</enum>
+    </property>
+    <property name="horizontalScrollMode">
+     <enum>QAbstractItemView::ScrollPerPixel</enum>
+    </property>
+    <property name="movement">
+     <enum>QListView::Static</enum>
     </property>
     <property name="isWrapping" stdset="0">
      <bool>false</bool>
+    </property>
+    <property name="resizeMode">
+     <enum>QListView::Fixed</enum>
     </property>
     <property name="batchSize">
      <number>300</number>
@@ -134,10 +168,16 @@
     <property name="geometry">
      <rect>
       <x>330</x>
-      <y>510</y>
+      <y>499</y>
       <width>541</width>
-      <height>50</height>
+      <height>61</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>2</verstretch>
+     </sizepolicy>
     </property>
     <property name="font">
      <font>
@@ -166,9 +206,9 @@
     <property name="geometry">
      <rect>
       <x>880</x>
-      <y>510</y>
-      <width>91</width>
-      <height>50</height>
+      <y>500</y>
+      <width>81</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -308,13 +348,26 @@
     <property name="geometry">
      <rect>
       <x>180</x>
-      <y>180</y>
+      <y>140</y>
       <width>93</width>
       <height>28</height>
      </rect>
     </property>
     <property name="text">
      <string>Login</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbLogout">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>180</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Logout</string>
     </property>
    </widget>
   </widget>

@@ -41,70 +41,61 @@ SiTCW::SiTCW(QWidget *parent)
 	
 }
 
+void SiTCW::SiTCW::display_message(Message& message) {
+	QGridLayout *MessageLayout = new QGridLayout();
+
+	QLabel *MessageSender = new QLabel(
+		QString("%1: %2").arg("FROM", message.getSender()),
+		ui.messageList
+	);
+	MessageSender->setStyleSheet("font-weight: bold");
+
+	QLabel *MessageRecipient = new QLabel(
+		QString("%1: %2").arg("TO", message.getRecepient()),
+		ui.messageList
+	);
+	MessageSender->setStyleSheet("font-weight: bold; text-align: right;");
+
+	MessageLayout->addWidget(MessageSender, 0, 0);
+	MessageLayout->addWidget(MessageRecipient, 0, 1);
+
+
+	QLabel *MessageText = new QLabel(
+		message.getMessage(),
+		ui.messageList
+	);
+	MessageText->setMaximumWidth(601);
+	MessageText->setWordWrap(true);
+
+	MessageLayout->addWidget(MessageText, 1, 0);
+
+	QWidget * MessageWidget = new QWidget();
+	MessageWidget->setStyleSheet(" background-color: #fff; border-radius: 8px; margin-bottom: 10px; ");
+	MessageWidget->setLayout(MessageLayout);
+
+	QListWidgetItem *ListItem = new QListWidgetItem();
+	ListItem->setSizeHint(MessageWidget->sizeHint());
+	ui.messageList->addItem(ListItem);
+	ui.messageList->setItemWidget(ListItem, MessageWidget);
+}
+
 void SiTCW::SiTCW::new_message(Message message){
-
-    QVBoxLayout *MessageLayout= new QVBoxLayout();
-
-    QLabel *MessageLabel = new QLabel(
-        message.getSender(),
-        ui.messageList
-    );
-
-    QLabel *MessageText = new QLabel(
-        message.getMessage(),
-        ui.messageList
-    );
-
-    MessageLabel->setStyleSheet("font-weight: bold");
-    MessageText->setMaximumWidth(601);
-    MessageText->setWordWrap(true);
-
-    MessageLayout->addWidget(MessageLabel);
-    MessageLayout->addWidget(MessageText);
-
-    QWidget * MessageWidget = new QWidget();
-    MessageWidget->setStyleSheet(" background-color: #fff; border-radius: 8px; margin-bottom: 10px; ");
-    MessageWidget->setLayout(MessageLayout);
-
-    QListWidgetItem *ListItem=new QListWidgetItem();
-    ListItem->setSizeHint( MessageWidget->sizeHint() );
-    ui.messageList->addItem(ListItem);
-    ui.messageList->setItemWidget(ListItem, MessageWidget );
-    ui.messageList->setSelectionMode(QAbstractItemView::NoSelection);
+	display_message(message);
+    
 
     // ... insert in database...
 }
 
 void SiTCW::SiTCW::add_item(){
 
-    QVBoxLayout *MessageLayout= new QVBoxLayout();
-
-    QLabel *MessageLabel = new QLabel(serial->get_current_logged_user(), ui.messageList);
-    QLabel *MessageText = new QLabel(ui.messageTextInput->toPlainText(), ui.messageList);
-    MessageLabel->setStyleSheet("font-weight: bold");
-    MessageText->setMaximumWidth(601);
-    MessageText->setWordWrap(true);
-
-    MessageLayout->addWidget(MessageLabel);
-    MessageLayout->addWidget(MessageText);
-
-    QWidget * MessageWidget = new QWidget();
-    MessageWidget->setStyleSheet(" background-color: #fff; border-radius: 8px; margin-bottom: 20px; ");
-    MessageWidget->setLayout(MessageLayout);
-
-    QListWidgetItem *ListItem=new QListWidgetItem();
-    ListItem->setSizeHint( MessageWidget->sizeHint() );
-    ui.messageList->addItem(ListItem);
-    ui.messageList->setItemWidget(ListItem, MessageWidget );
-    ui.messageList->setSelectionMode(QAbstractItemView::NoSelection);
-
-
 	// sending message
 	if (ui.contactList->currentItem()) {
-		QString to;
-		to = ui.contactList->currentItem()->text();
+		QString to = ui.contactList->currentItem()->text();
 		Message mess(to, ui.messageTextInput->toPlainText());
 		serial->send_message(mess);
+		display_message(mess);
+		// clear input
+		ui.messageTextInput->clear();
 	}
 }
 

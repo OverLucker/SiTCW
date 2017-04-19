@@ -9,6 +9,9 @@
 class SiTCW : public QMainWindow
 {
 	Q_OBJECT
+
+private:
+	void display_message(Message&);
 public:
 	SiTCW(QWidget *parent = Q_NULLPTR);
 
