@@ -6,6 +6,7 @@
 
 void PostSerial::readHandle(QByteArray data) {
 	if (data.isEmpty()) return;
+	QSqlQuery query;
 	// parse what data came etc
 	// depending on data came we should decide which signal to emit
 	try {
@@ -15,7 +16,22 @@ void PostSerial::readHandle(QByteArray data) {
 		QString to = chunks[1].split('=')[1];
 		QString message = chunks[2].split('=')[1];
 		Message mess(from, to, message);
-	emit PostSerial::new_message(mess);
+		
+		
+		QString from_id;
+		QString to_id;
+		Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(from)));
+		if (query.first()) {
+			from_id = query.value(0).toString();
+		}
+		
+		Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(to)));
+		if (query.first()) {
+			to_id = query.value(0).toString();
+		}
+		query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, message, QString::number(statusMessage_recieved)));
+
+		emit PostSerial::new_message(mess);
 	}
 	catch (...)
 	{
@@ -62,4 +78,16 @@ void PostSerial::logout(QString username) {
 
 QString PostSerial::get_current_logged_user() {
 	return this->logged_username;
+}
+void PostSerial::addressBookRemove(QString username) {
+	emit userRemoved(username);
+}
+void PostSerial::addressBookAdd(QString username) {
+	QSqlQuery query;
+	Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(username)));
+	if (!query.first()) {
+		query.exec(QString("INSERT INTO users(username) VALUES ('%1');").arg(username));
+	}
+	QString _id = query.value(0).toString();
+	emit userAdded(username);
 }

@@ -30,8 +30,8 @@ SiTCW::SiTCW(QWidget *parent)
 
 
 	// address book events
-	connect(serial, &DirectedTokenRing::userLoggedIn, this, &SiTCW::addressBookAdd);
-	connect(serial, &DirectedTokenRing::userLoggedOut, this, &SiTCW::addressBookRemove);
+	connect(serial, &PostSerial::userAdded, this, &SiTCW::addressBookAdd);
+	connect(serial, &PostSerial::userRemoved, this, &SiTCW::addressBookRemove);
 
 	// user events
 	connect(ui.pbLogin, SIGNAL(released()), this, SLOT(login()));
