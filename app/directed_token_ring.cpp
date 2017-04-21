@@ -3,12 +3,17 @@
 #include <QMessageBox>
 #include <algorithm>
 #include <time.h>
+#include <QTimer>
 
+
+#define LOG_OUT_DELAY 500
+#define SINGLE_FRAME_AWAIT_TIMER 1000
 
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
 	connect(this, &LowLevelClient::frame_ready, this, &DirectedTokenRing::frameReadyHandler);
 	connect(this, &LowLevelClient::connectionOpen, this, &DirectedTokenRing::onNetworkConnectionOpen);
+	connect(this, &LowLevelClient::errorOccured, this, &DirectedTokenRing::ringErrorHandler);
 }
 
 QList<QString> DirectedTokenRing::get_contacts() {
@@ -17,8 +22,10 @@ QList<QString> DirectedTokenRing::get_contacts() {
 
 void DirectedTokenRing::ringErrorHandler(LowLevelClientError error) {
 	if (error == LowLevelClientError::ConnectionClosed) {
-		//TODO: After release special frame, send it to "out"
-		DirectedTokenRing::network_disconnect();
+		QByteArray data;
+		data.append((quint8)SuperVisorFrameTypes::Disconnect);
+		send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
+		QTimer::singleShot(LOG_OUT_DELAY, this, SLOT(network_disconnect()));
 	}
 
 }
@@ -32,9 +39,6 @@ void DirectedTokenRing::send_frame(QByteArray data) {
 }
 
 void DirectedTokenRing::send(QByteArray data, QVector<QString> recipients) {
-	// Функционал этой процедуры был перемещен в DirectedTokenRing::send_frame
-	//  в связи с количеством вызовов и общностью использования
-	//  теперь эта процедура отвечает за отправку информационных кадров
 	QVector<quint8> rec;
 	for (auto it : recipients)
 		rec.append(pa.key(it));
@@ -62,8 +66,7 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 	// decode with codec
 	if (this->codec)
 		data = codec->decode(data);
-
-	// ToDo: нужен обработчик кадров
+	
 	if (data.length() <= 0)
 		return;
 
@@ -75,6 +78,11 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)fr_data[0]);
 		if (fr_type == SuperVisorFrameTypes::Meeting) {
 			quint8 inc_num = fr_data[1];
+			if (def_number == 0) {
+				qsrand(time(NULL));
+				qsrand(qrand());
+				def_number = qrand() % 254 + 1; // 1 - 255
+			}
 			if (inc_num == def_number)
 				return;
 
@@ -100,6 +108,10 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 			emit userLoggedOut(username);
 		}
 		
+		if (fr_type == SuperVisorFrameTypes::Disconnect) {
+			emit LowLevelClient::errorOccured(LowLevelClientError::ConnectionClosed);
+			return;
+		}
 	}
 	if (f.getFrameType() == FrameType::Information) {
 		if (f.getRecipients().indexOf(local_address) >= 0)
@@ -119,8 +131,11 @@ void DirectedTokenRing::onNetworkConnectionOpen() {
 	QByteArray data;
 	data.append((quint8)SuperVisorFrameTypes::Meeting);
 
-	qsrand(time(NULL));
-	def_number = qrand() % 254 + 1; // 1 - 255
+	if (def_number == 0) {
+		qsrand(time(NULL));
+		qsrand(qrand());
+		def_number = qrand() % 254 + 1; // 1 - 255
+	}
 	data.append(def_number);
 	known_numbers.append(def_number);
 	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));

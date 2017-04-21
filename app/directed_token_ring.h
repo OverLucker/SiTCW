@@ -4,6 +4,7 @@
 #ifndef DIRECTED_TOKEN_RING
 #define DIRECTED_TOKEN_RING
 
+#define LOG_OUT_DELAY 500
 
 #include <QMap>
 #include "codec.h"
@@ -22,11 +23,9 @@ private:
 
 	quint8 local_address = 0;
 	quint8 def_number = 0;
-	quint8 app_address = 0;
-	quint8 second_round = 0;
 	QVector<quint8> known_numbers;
 
-	// состояния каждого клиента 
+	// состояния каждого клиента
 	//  1. не подключен
 	//  2. подключен, но не готов к передаче
 	//  3. подключен и готов к передаче
@@ -64,6 +63,10 @@ public:
 	void send(QByteArray data, QVector<QString> recipients);
 	void send_user_login(const QString& username);
 	void send_user_logout(const QString& username);
+	// for test only
+	int get_local_address() {
+		return this->local_address;
+	}
 	QList<QString> get_contacts();
 
 

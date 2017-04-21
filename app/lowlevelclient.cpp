@@ -10,9 +10,9 @@ int LowLevelClient::network_connect(const QString& port_in, const QString& port_
 		this->out = new QSerialPort(port_out, this);
 
 		// Here you should add connectors if you want to
-		connect(in, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(ringErrorHandler(QSerialPort::SerialPortError)));
+		connect(in, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(errorHandler(QSerialPort::SerialPortError)));
 		connect(in, &QSerialPort::readyRead, this, &LowLevelClient::qserialreadHandler);
-		connect(out, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(ringErrorHandler(QSerialPort::SerialPortError)));
+		connect(out, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(errorHandler(QSerialPort::SerialPortError)));
 
 		// openning ports
 		if (!this->in->open(QIODevice::ReadOnly)) {
@@ -114,6 +114,8 @@ void LowLevelClient::send(const QByteArray& data) {
 	this->out->write(new_data);
 }
 
-void LowLevelClient::errorHandler(QSerialPort::SerialPortError) {
-
+void LowLevelClient::errorHandler(QSerialPort::SerialPortError error) {
+	if (error == QSerialPort::SerialPortError::ResourceError) {
+		emit errorOccured(LowLevelClientError::ConnectionClosed);
+	}
 }
