@@ -4,9 +4,13 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
 #include <QHBoxLayout>
+#include <QTimer>
+#include <QCloseEvent>
 
 // VERY IMPORTANT THING!!!
 #pragma execution_character_set("utf-8")
+
+
 
 
 SiTCW::SiTCW(QWidget *parent)
@@ -22,12 +26,20 @@ SiTCW::SiTCW(QWidget *parent)
 		ui.netInputPortOut->insertItem(1000, item.portName(), 0);
 	}
 	
+	// prepare first appearance
+	//ui.portWidget->setVisible(true);
+	// this->setCentralWidget(ui.portWidget);
+	//ui.authWidget->setVisible(false);
+	//ui.mainWidget->setVisible(false);
+
+	connect(this, SIGNAL(close()), this, SLOT(onClose()));
+
 	// connection events
-	connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
+	// connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
+	connect(serial, &PostSerial::ClientStateChanged, this, &SiTCW::connectionOpen);
 	connect(serial, &PostSerial::errorOccured, this, &SiTCW::netError);
 	connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(netConnect()));
 	connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(netDisconnect()));
-
 
 	// address book events
 	connect(serial, &DirectedTokenRing::userLoggedIn, this, &SiTCW::addressBookAdd);
@@ -41,6 +53,8 @@ SiTCW::SiTCW(QWidget *parent)
 	connect(serial, SIGNAL(new_message(Message)), this, SLOT(new_message(Message)));
 	connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
 	connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
+
+	ui.netBtnDisconnect->setEnabled(false);
 
 }
 
@@ -105,37 +119,50 @@ void SiTCW::SiTCW::add_item(){
 void SiTCW::SiTCW::select_user(QListWidgetItem * item){
 
     const QString text = item->text();
-    ui.currentItem->setText(text);
 
 }
 
 void SiTCW::SiTCW::netConnect() {
 	int res = serial->network_connect(ui.netInputPortIn->currentText(), ui.netInputPortOut->currentText());
-	if (res) {
-		
+	ui.statusBar->showMessage(QString("Попытка подсоединиться. Уникальное значение = %1").arg(serial->get_def_num()));
+	if (!res) {
+		QMessageBox::information(this, "Статус подключения", "Произошла ошибка");
+		ui.statusBar->showMessage("Ошибка подключения");
 	}
-	else
-		QMessageBox::information(this, "Connection status", "An error occured");
+	ui.netBtnDisconnect->setEnabled(true);
+	ui.netBtnConnect->setEnabled(false);
+	ui.gbPortIn->setEnabled(false);
+	ui.gbPortOut->setEnabled(false);
 }
 
 void SiTCW::SiTCW::netDisconnect() {
-	serial->network_disconnect();
-	QMessageBox::information(this, "Connection status", "Disconnected");
+	serial->logout(serial->get_current_logged_user());
+	QTimer::singleShot(LOG_OUT_DELAY, serial, SLOT(network_disconnect()));
+	QMessageBox::information(this, "Статус подключения", "Разъединено");
+	ui.statusBar->showMessage("Разъединено");
 }
 
-void SiTCW::SiTCW::connectionOpen() {
-	QMessageBox::information(this, "Connection status", "Success");
+void SiTCW::SiTCW::connectionOpen(PostSerial::ClientState state) {
+	if (state == PostSerial::ClientState::Connected) {
+		QMessageBox::information(this, "Статус подключения", "Успех");
+		ui.statusBar->showMessage(QString("Успешно подключено. Адрес в сети = %1").arg(serial->get_local_address()));
+	}
+	
 }
 
-void SiTCW::SiTCW::netError(LowLevelClient::LowLevelClientError error) {
-	QMessageBox::information(this, "Connection status", "Network error occured");
+void SiTCW::SiTCW::netError(LowLevelClient::LowLevelClientError) {
+	QMessageBox::information(this, "Статус подключения", "Произошла ошибка сети");
+	ui.statusBar->showMessage("Произошла ошибка сети");
 }
 
 void SiTCW::SiTCW::login() {
-	if (!serial->login(ui.leLogin->text(), ui.lePass->text()))
-		QMessageBox::information(this, "Login failed", "Login failed!!!");
-	else
-		QMessageBox::information(this, "Login success", "Login success");
+	if (!serial->login(ui.leLogin->text(), ui.lePass->text())) {
+		QMessageBox::information(this, "Ошибка авторизации", "Ошибка авторизации. Проверьте ваше имя пользователя и пароль.");
+		ui.statusBar->showMessage("Ошибка авторизации");
+	}
+	else {
+		ui.statusBar->showMessage(QString("Авторизация прошла успешно. Адрес в сети = %1").arg(serial->get_local_address()));
+	}
 }
 
 void SiTCW::SiTCW::logout() {
@@ -148,5 +175,16 @@ void SiTCW::SiTCW::addressBookAdd(QString username) {
 }
 
 void SiTCW::SiTCW::addressBookRemove(QString username) {
-	ui.contactList->removeItemWidget(ui.contactList->findItems(username, Qt::MatchExactly)[0]);
+	try {
+		if (ui.contactList->findItems(username, Qt::MatchExactly).length() > 0)
+			ui.contactList->removeItemWidget(ui.contactList->findItems(username, Qt::MatchExactly)[0]);
+	}
+	catch (...) {
+
+	}
+}
+
+void SiTCW::SiTCW::closeEvent(QCloseEvent*) {
+	
+	// serial->network_disconnect();
 }

@@ -23,12 +23,13 @@ private slots:
 	void new_message(Message message);
 	void netConnect();
 	void netDisconnect();
-	void connectionOpen();
+	void connectionOpen(PostSerial::ClientState);
 	void netError(LowLevelClient::LowLevelClientError);
 	void login();
 	void logout();
 	void addressBookAdd(QString username);
 	void addressBookRemove(QString username);
+	void closeEvent(QCloseEvent*);
 
 private:
 	Ui::SiTCWClass ui;
