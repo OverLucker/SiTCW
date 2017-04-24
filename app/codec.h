@@ -56,26 +56,10 @@ public:
 		return err;
 	}
 
-	bitmap decode_full_vectore (bitmap src) {
-		int err
-
-		for (int i = 0, o = 0; i < bitCount; ++i)
-		{
-			if (bit_count(bitmap(i + 1)) <= 1)
-				continue;
-			ans[i] = src[o++];
-		}
-
-	}
-
 	bool check_for_error(QBitArray src) {
 		int sum = 0;
 		for (int i = 0; i < bitCount; ++i)
 		{
-			/*if (bit_count(bitmap(i + 1)) == 1 && src[bitCount - i-1]) {
-				err = true;
-				break;
-			}*/
 			if (src[bitCount -i-1])
 				sum ^= (i + 1);
 		}
@@ -99,7 +83,6 @@ public:
 		int err = control_sum(ans);
 		for (int tmp = 1; tmp < bitCount; tmp = tmp << 1)
 			ans[tmp - 1] = err & tmp;
-
 
 		return ans;
 	}
@@ -129,7 +112,7 @@ public:
 
 	QByteArray bitsetToByteArray(bitmap& bitSet) {
 		QByteArray byteArray;
-		int maxSize = bitCount / 8 + 1;
+		int maxSize = bitCount / 8 + (bitCount % 8 ? 1 : 0);
 		byteArray.resize(maxSize);
 		for (int i = 0; i < maxSize; i++)
 			byteArray[i] = 0x00;
@@ -142,14 +125,15 @@ public:
 	
 	QByteArray bitArrayToByteArray(QBitArray bits) {
 		// Resulting byte array
-			QByteArray bytes;
-			int maxSize = bits.count() / 8 + 1;
-			bytes.resize(maxSize);
-			for (int i = 0; i < maxSize; i++)
-				bytes[i] = 0x00;
+		QByteArray bytes;
+		int maxSize = bits.count() / 8 + (bits.count() % 8 ? 1 : 0);
+		bytes.resize(maxSize);
+		for (int i = 0; i < maxSize; i++)
+			bytes[i] = 0x00;
 		// Convert from QBitArray to QByteArray
-		for (int b = 0; b<bits.count(); ++b)
+		for (int b = 0; b < bits.count(); ++b)
 			bytes[b / 8] = (bytes.at(b / 8) | ((bits[b] ? 1 : 0) << (7 - (b % 8))));
+
 		return bytes;
 	}
 
