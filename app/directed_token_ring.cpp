@@ -3,17 +3,25 @@
 #include <QMessageBox>
 #include <algorithm>
 #include <time.h>
-#include <QTimer>
+
 
 
 #define LOG_OUT_DELAY 500
-#define SINGLE_FRAME_AWAIT_TIMER 1000
+#define SINGLE_FRAME_AWAIT_TIMER 900
 
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
 	connect(this, &LowLevelClient::frame_ready, this, &DirectedTokenRing::frameReadyHandler);
 	connect(this, &LowLevelClient::connectionOpen, this, &DirectedTokenRing::onNetworkConnectionOpen);
 	connect(this, &LowLevelClient::errorOccured, this, &DirectedTokenRing::ringErrorHandler);
+	connect(timer, &QTimer::timeout, this, &DirectedTokenRing::frameTimeout);
+	qsrand(time(NULL));
+	qsrand(qrand());
+	def_number = qrand() % 254 + 1; // 1 - 255
+	known_numbers.append(def_number);
+	timer->setSingleShot(true);
+	timer->setInterval(SINGLE_FRAME_AWAIT_TIMER);
+	
 }
 
 QList<QString> DirectedTokenRing::get_contacts() {
@@ -36,6 +44,11 @@ void DirectedTokenRing::send_frame(QByteArray data) {
 		data = codec->encode(data);
 
 	LowLevelClient::send(data);
+}
+
+void DirectedTokenRing::frameTimeout() {
+	send_frame(last_frame);
+	timer->start();
 }
 
 void DirectedTokenRing::send(QByteArray data, QVector<QString> recipients) {
@@ -66,11 +79,11 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 	// decode with codec
 	if (this->codec)
 		data = codec->decode(data);
-	
-	if (data.length() <= 0)
-		return;
 
 	Frame f = FrameBuilder::fromByteArray(data);
+	if (f.getFrameType() == FrameType::Null)
+		return;
+
 	QByteArray fr_data = f.getData();
 
 	if (f.getFrameType() == FrameType::SuperVisor) {
@@ -78,21 +91,29 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)fr_data[0]);
 		if (fr_type == SuperVisorFrameTypes::Meeting) {
 			quint8 inc_num = fr_data[1];
-			if (def_number == 0) {
-				qsrand(time(NULL));
-				qsrand(qrand());
-				def_number = qrand() % 254 + 1; // 1 - 255
-			}
-			if (inc_num == def_number)
-				return;
-
-			if (known_numbers.indexOf(inc_num) < 0)
+			
+			if (known_numbers.indexOf(inc_num) < 0) {
 				known_numbers.append(inc_num);
+				std::sort(known_numbers.begin(), known_numbers.end());
+			}
 
-			std::sort(known_numbers.begin(), known_numbers.end());
 			local_address = known_numbers.indexOf(def_number) + 1;
 
-			send_frame(f);
+			if (inc_num == def_number) {
+				timer->stop();
+				// обновим статус клиента
+				if (client_state != ClientState::Connected) {
+					client_state = ClientState::Connected;
+					emit ClientStateChanged(client_state);
+				}
+				
+				return;
+			}
+
+			QByteArray data;
+			data.append((quint8)SuperVisorFrameTypes::Meeting);
+			data.append(inc_num);
+			send_frame(FrameBuilder::makeSupervisorFrame(0, data));
 			return;
 		}
 
@@ -123,20 +144,10 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 }
 
 void DirectedTokenRing::onNetworkConnectionOpen() {
-	// обновим статус клиента
-	client_state = ClientState::Connected;
-	emit ClientStateChanged(client_state);
-
-	// ToDo: отправка кадра для знакомства
 	QByteArray data;
 	data.append((quint8)SuperVisorFrameTypes::Meeting);
-
-	if (def_number == 0) {
-		qsrand(time(NULL));
-		qsrand(qrand());
-		def_number = qrand() % 254 + 1; // 1 - 255
-	}
 	data.append(def_number);
-	known_numbers.append(def_number);
-	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
+	this->last_frame = FrameBuilder::makeSupervisorFrame(0, data);
+	timer->start();
+	send_frame(last_frame);
 }

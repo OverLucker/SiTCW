@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QtSerialPort\QSerialPort>
 
+
 #define START_BYTE 1
 #define STOP_BYTE 0x7F
 #define ESCAPE_BYTE '\\'

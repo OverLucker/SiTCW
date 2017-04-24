@@ -1,5 +1,6 @@
 ﻿#include "lowlevelclient.h"
 
+
 LowLevelClient::LowLevelClient(QObject*parent) : QObject(parent) {
 
 }

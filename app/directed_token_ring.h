@@ -10,6 +10,7 @@
 #include "codec.h"
 #include <QVector>
 #include "lowlevelclient.h"
+#include <QTimer>
 
 class DirectedTokenRing : public LowLevelClient {
 	Q_OBJECT
@@ -24,19 +25,21 @@ private:
 	quint8 local_address = 0;
 	quint8 def_number = 0;
 	QVector<quint8> known_numbers;
+	QTimer* timer = new QTimer(this);
 
 	// состояния каждого клиента
 	//  1. не подключен
 	//  2. подключен, но не готов к передаче
 	//  3. подключен и готов к передаче
 	//
-
+public:
 	enum class ClientState {
 		NotConnected,
 		Connected,
 		Ready
 	};
 
+private:
 	ClientState client_state = ClientState::NotConnected;
 
 	// буферы
@@ -52,6 +55,7 @@ private:
 	// кодеки для шифровки и расшифровки сообщений
 	Codec * codec = 0;
 
+	QByteArray last_frame;
 
 	void send_frame(QByteArray data);
 public:
@@ -67,6 +71,9 @@ public:
 	int get_local_address() {
 		return this->local_address;
 	}
+	int get_def_num() {
+		return this->def_number;
+	}
 	QList<QString> get_contacts();
 
 
@@ -75,6 +82,7 @@ private slots:
 	void onNetworkConnectionOpen();
 	void frameReadyHandler(QByteArray);
 	void ringErrorHandler(LowLevelClientError);
+	void frameTimeout();
 
 
 signals:
