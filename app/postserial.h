@@ -19,11 +19,11 @@ class PostSerial : public DirectedTokenRing {
 
 	QSqlDatabase db;
 	QString logged_username;
-	//statuses of message
+	/*statuses of message
 	const int statusMessage_sended = 0;
 	const int statusMessage_recieved = 1;
 	const int statusMessage_opened = 2;
-
+	*/
 private slots:
 	void readHandle(QByteArray);
 
@@ -56,6 +56,9 @@ public:
 	QString get_current_logged_user();
 	int send_message(Message message);
 	int notify_message_read(Message& message);
+	QVector <Message> getIncomingPostbox();
+	QVector <Message> getOutcomingPostbox();
+	QString get_user_id(QString username);
 
 public slots:
 	bool login(QString username, QString pass);

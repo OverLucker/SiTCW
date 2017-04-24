@@ -13,6 +13,13 @@ protected:
 	QString message;
 
 public:
+	Message(const QString& from, const QString& to, const QString& message, const bool read) {
+		this->read = read;
+		this->from = from;
+		this->to = to;
+		this->message = message;
+	}
+
 	Message(const QString& from, const QString& to, const QString& message) {
 		this->read = false;
 		this->from = from;
@@ -20,6 +27,12 @@ public:
 		this->message = message;
 	}
 
+	Message() {
+		this->read = false;
+		this->from = "";
+		this->to = "";
+		this->message = "";
+	}
 	// Отправитель может быть опущен
 	Message(const QString& to, const QString& message) {
 		this->read = false;
@@ -33,6 +46,7 @@ public:
 	QString getSender() { return this->from; }
 	QString getRecepient() { return this->to; }
 	QString getMessage() { return this->message; }
+
 };
 
 

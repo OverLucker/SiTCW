@@ -29,7 +29,7 @@ void PostSerial::readHandle(QByteArray data) {
 		if (query.first()) {
 			to_id = query.value(0).toString();
 		}
-		query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, message, QString::number(statusMessage_recieved)));
+		query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, message, QString::number(0)));
 
 		emit PostSerial::new_message(mess);
 	}
@@ -43,10 +43,26 @@ int PostSerial::send_message(Message mess) {
 	if (logged_username == QString())
 		return false;
 
+	QSqlQuery query;
+	QString from_id;
+	QString to_id;
+	Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(logged_username)));
+	if (query.first()) {
+		from_id = query.value(0).toString();
+	}
+
+	Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(mess.getRecepient())));
+	if (query.first()) {
+		to_id = query.value(0).toString();
+	}
+	query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, mess.getMessage(), QString::number(0)));
+	QString _id = query.lastInsertId().toString();
+
 	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(logged_username, mess.getRecepient(), mess.getMessage());
 	QVector<QString> recs;
 	recs.append(mess.getRecepient());
 	this->send(data.toStdString().c_str(), recs);
+
 	return true;
 }
 
@@ -90,4 +106,50 @@ void PostSerial::addressBookAdd(QString username) {
 	}
 	QString _id = query.value(0).toString();
 	emit userAdded(username);
+}
+
+QVector <Message> PostSerial::getIncomingPostbox() {
+	QSqlQuery query;
+	QString to = get_user_id(get_current_logged_user());
+	QVector <Message> postboxMessages;
+	Q_ASSERT(query.exec(QString("SELECT sender, message, status  FROM postbox WHERE recipient = \'%1\';").arg(to)));
+
+	while (query.next()) {
+		QString from = query.value(0).toString();
+		QString message = query.value(1).toString();
+		bool status = query.value(2).toInt();
+		postboxMessages.push_back(Message(from, to, message, status));
+	}
+	return postboxMessages;
+}
+
+QVector <Message> PostSerial::getOutcomingPostbox() {
+	QSqlQuery query;
+	QString from = get_user_id( get_current_logged_user());
+	QVector <Message> postboxMessages;
+	Q_ASSERT(query.exec(QString("SELECT recipient, message, status  FROM postbox WHERE sender = \'%1\';").arg(from)));
+
+	while (query.next()) {
+		QString to = query.value(0).toString();
+		QString message = query.value(1).toString();
+		bool status = query.value(2).toInt();
+		postboxMessages.push_back(Message(from, to, message, status));
+	}
+	return postboxMessages;
+}
+
+QString PostSerial::get_user_id(QString username) {
+	QSqlQuery query;
+	QString id;
+	Q_ASSERT(query.exec(QString("SELECT id FROM users WHERE username = \'%1\';").arg(username)));
+	if (query.first()) {
+		id = query.value(0).toString();
+	}
+	return id;
+}
+
+int PostSerial::notify_message_read(Message &message) {
+	//нужно придумать Проапргейдить  Message, чтобы он хранил ещё и id
+	return 0;
+
 }
