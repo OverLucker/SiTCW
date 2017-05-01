@@ -27,10 +27,6 @@ SiTCW::SiTCW(QWidget *parent)
 	}
 	
 	// prepare first appearance
-	//ui.portWidget->setVisible(true);
-	// this->setCentralWidget(ui.portWidget);
-	//ui.authWidget->setVisible(false);
-	//ui.mainWidget->setVisible(false);
 
 	connect(this, SIGNAL(close()), this, SLOT(onClose()));
 
@@ -129,10 +125,12 @@ void SiTCW::SiTCW::netConnect() {
 		QMessageBox::information(this, "Статус подключения", "Произошла ошибка");
 		ui.statusBar->showMessage("Ошибка подключения");
 	}
-	ui.netBtnDisconnect->setEnabled(true);
-	ui.netBtnConnect->setEnabled(false);
-	ui.gbPortIn->setEnabled(false);
-	ui.gbPortOut->setEnabled(false);
+	else {
+		ui.netBtnDisconnect->setEnabled(true);
+		ui.netBtnConnect->setEnabled(false);
+		ui.gbPortIn->setEnabled(false);
+		ui.gbPortOut->setEnabled(false);
+	}
 }
 
 void SiTCW::SiTCW::netDisconnect() {
@@ -140,6 +138,10 @@ void SiTCW::SiTCW::netDisconnect() {
 	QTimer::singleShot(LOG_OUT_DELAY, serial, SLOT(network_disconnect()));
 	QMessageBox::information(this, "Статус подключения", "Разъединено");
 	ui.statusBar->showMessage("Разъединено");
+	ui.netBtnDisconnect->setEnabled(false);
+	ui.netBtnConnect->setEnabled(true);
+	ui.gbPortIn->setEnabled(true);
+	ui.gbPortOut->setEnabled(true);
 }
 
 void SiTCW::SiTCW::connectionOpen(PostSerial::ClientState state) {
@@ -153,6 +155,10 @@ void SiTCW::SiTCW::connectionOpen(PostSerial::ClientState state) {
 void SiTCW::SiTCW::netError(LowLevelClient::LowLevelClientError) {
 	QMessageBox::information(this, "Статус подключения", "Произошла ошибка сети");
 	ui.statusBar->showMessage("Произошла ошибка сети");
+	ui.netBtnDisconnect->setEnabled(false);
+	ui.netBtnConnect->setEnabled(true);
+	ui.gbPortIn->setEnabled(true);
+	ui.gbPortOut->setEnabled(true);
 }
 
 void SiTCW::SiTCW::login() {
@@ -184,7 +190,7 @@ void SiTCW::SiTCW::addressBookRemove(QString username) {
 	}
 }
 
-void SiTCW::SiTCW::closeEvent(QCloseEvent*) {
-	
-	// serial->network_disconnect();
+void SiTCW::SiTCW::closeEvent(QCloseEvent* ev) {
+	serial->network_disconnect();
+	ev->accept();
 }
