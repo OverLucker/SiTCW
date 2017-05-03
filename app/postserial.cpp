@@ -15,6 +15,11 @@ void PostSerial::readHandle(QByteArray data) {
 		QString from = chunks[0].split('=')[1];
 		QString to = chunks[1].split('=')[1];
 		QString message = chunks[2].split('=')[1];
+		QString external_id = chunks[3].split('=')[1];
+		if (external_id == "-1") {
+			//"open convert"
+			Q_ASSERT(query.exec(QString("UPDATE postbox SET status = 1 WHERE message_id = \'%1\';").arg(message)));
+		}
 		
 		QString from_id;
 		QString to_id;
@@ -27,7 +32,7 @@ void PostSerial::readHandle(QByteArray data) {
 		if (query.first()) {
 			to_id = query.value(0).toString();
 		}
-		query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, message, QString::number(0)));
+		query.exec(QString("INSERT INTO postbox(sender, recipient, message, status, external_id) VALUES (%1, %2, '%3', %4, %5);").arg(from_id, to_id, message, QString::number(0), external_id));
 		QString message_id = query.lastInsertId().toString();
 		Message mess(from, to, message, false, message_id);
 		emit PostSerial::new_message(mess);
@@ -57,7 +62,7 @@ int PostSerial::send_message(Message mess) {
 	query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, mess.getMessage(), QString::number(0)));
 	QString _id = query.lastInsertId().toString();
 
-	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3").arg(logged_username, mess.getRecepient(), mess.getMessage());
+	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3;ID=%4").arg(logged_username, mess.getRecepient(), mess.getMessage(), _id);
 	QVector<QString> recs;
 	recs.append(mess.getRecepient());
 	this->send(data.toStdString().c_str(), recs);
@@ -147,8 +152,24 @@ QString PostSerial::get_user_id(QString username) {
 	return id;
 }
 
-int PostSerial::notify_message_read(Message &message) {
-	//нужно придумать Проапргейдить  Message, чтобы он хранил ещё и id
+//ВЫЗВАТЬ ВЛАДУ ДЛЯ ОТКРЫТИЯ КОНВЕРТА
+int PostSerial::notify_message_read(QString external_id) {
+	QSqlQuery query;
+	Q_ASSERT(query.exec(QString("SELECT u.username, u2.username FROM postbox as p \
+								JOIN users AS u ON u.userid = p.sender \
+								JOIN users as u2 ON u2.userid = p.recipient\
+								WHERE p.external_id = \'%1\';").arg(external_id)));
+	QString from, to;
+	if (query.first()) {
+		to = query.value(0).toString();
+		from = query.value(1).toString();
+	}
+
+	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3;ID=%4").arg(from, to, external_id, QString("-1"));
+	QVector<QString> recs;
+	recs.append(to);
+	this->send(data.toStdString().c_str(), recs);
+
 	return 0;
 
 }
