@@ -55,6 +55,9 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="styleSheet">
        <string notr="true"/>
       </property>
@@ -164,6 +167,9 @@
           <layout class="QGridLayout" name="portFrameLayout" columnstretch="0,0">
            <item row="0" column="0">
             <widget class="QPushButton" name="netBtnDisconnect">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="autoFillBackground">
               <bool>false</bool>
              </property>
@@ -234,6 +240,9 @@
            </item>
            <item row="2" column="1">
             <widget class="QPushButton" name="pbLogout">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>

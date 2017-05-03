@@ -95,9 +95,11 @@ void PostSerial::logout(QString username) {
 QString PostSerial::get_current_logged_user() {
 	return this->logged_username;
 }
+
 void PostSerial::addressBookRemove(QString username) {
 	emit userRemoved(username);
 }
+
 void PostSerial::addressBookAdd(QString username) {
 	QSqlQuery query;
 	Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(username)));

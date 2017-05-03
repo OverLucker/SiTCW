@@ -8,7 +8,7 @@
 #include <QtSerialPort\QSerialPort>
 
 
-#define START_BYTE 1
+#define START_BYTE 0x7E
 #define STOP_BYTE 0x7F
 #define ESCAPE_BYTE '\\'
 
@@ -25,7 +25,7 @@ private:
 	bool data_started = false;
 	bool esc_char = false;
 	QByteArray buffer;
-
+		
 public:
 	enum class LowLevelClientError {
 		NoError,
@@ -33,14 +33,26 @@ public:
 		ConnectionClosed
 	};
 
+	enum class ConnectionState {
+		Disconnected,
+		Connected
+	};
+
+private:
+	ConnectionState conn_state = ConnectionState::Disconnected;
+	void setConnectionState(ConnectionState state);
+
+public:
 	LowLevelClient(QObject* parent = nullptr);
 	int network_connect(const QString& port_in, const QString& port_out);
 	int network_disconnect();
 	void send(const QByteArray& data);
+	ConnectionState getConnectionState();
 
 
 private slots:
 	void qserialreadHandler();
+	void qserialDTRChanged(bool);
 	void errorHandler(QSerialPort::SerialPortError);
 
 signals:

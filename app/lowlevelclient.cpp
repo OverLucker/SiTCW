@@ -13,7 +13,9 @@ int LowLevelClient::network_connect(const QString& port_in, const QString& port_
 		// Here you should add connectors if you want to
 		connect(in, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(errorHandler(QSerialPort::SerialPortError)));
 		connect(in, &QSerialPort::readyRead, this, &LowLevelClient::qserialreadHandler);
+		connect(in, &QSerialPort::dataTerminalReadyChanged, this, &LowLevelClient::qserialDTRChanged);
 		connect(out, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(errorHandler(QSerialPort::SerialPortError)));
+		connect(out, &QSerialPort::readyRead, this, &LowLevelClient::qserialreadHandler);
 
 		// openning ports
 		if (!this->in->open(QIODevice::ReadOnly)) {
@@ -34,6 +36,9 @@ int LowLevelClient::network_connect(const QString& port_in, const QString& port_
 			emit errorOccured(LowLevelClientError::OpenError);
 			return 0;
 		}
+		this->out->setDataTerminalReady(true);
+		this->in->setDataTerminalReady(true);
+		setConnectionState(ConnectionState::Connected);
 		emit LowLevelClient::connectionOpen();
 		return 1;
 	}
@@ -41,26 +46,34 @@ int LowLevelClient::network_connect(const QString& port_in, const QString& port_
 }
 
 int LowLevelClient::network_disconnect() {
+	if (!this->in && !this->out)
+		return 1;
+
 	if (this->in) {
+		if (this->in->isDataTerminalReady())
+			this->in->setDataTerminalReady(false);
 		this->in->disconnect();
 		this->in->close();
 	}
 	if (this->out) {
+		if (this->out->isDataTerminalReady())
+			this->out->setDataTerminalReady(false);
 		this->out->disconnect();
 		this->out->close();
 	}
 	this->in = 0;
 	this->out = 0;
 
+	setConnectionState(ConnectionState::Connected);
 	// ToDo: Отправка кадра о закрытии соединения
-	emit connectionClosed();
+	// emit connectionClosed();
 	return 0;
 }
 
 void LowLevelClient::qserialreadHandler() {
 	QByteArray& data = this->buffer;
 	char c;
-	while (true) {
+	while (conn_state == ConnectionState::Connected && this->in->bytesAvailable() > 0) {
 		// case 1 : there is data but we didnt had a data START_BYTE
 		while (!this->data_started && this->in->getChar(&c)) {
 			if (c == START_BYTE)
@@ -89,11 +102,8 @@ void LowLevelClient::qserialreadHandler() {
 
 			data.append(c);	
 		}
-		if (this->in->bytesAvailable() <= 0)
-			break;
 	}
 }
-
 
 void LowLevelClient::send(const QByteArray& data) {
 	QByteArray new_data;
@@ -112,11 +122,37 @@ void LowLevelClient::send(const QByteArray& data) {
 	// стоповый байт
 	new_data.append(STOP_BYTE);
 
-	this->out->write(new_data);
+	if (this->conn_state == ConnectionState::Connected)
+		this->out->write(new_data);
 }
 
 void LowLevelClient::errorHandler(QSerialPort::SerialPortError error) {
-	if (error == QSerialPort::SerialPortError::ResourceError) {
+	if (error == QSerialPort::SerialPortError::NoError)
+		return;
+
+	if (conn_state != ConnectionState::Disconnected) {
+		setConnectionState(ConnectionState::Disconnected);
 		emit errorOccured(LowLevelClientError::ConnectionClosed);
 	}
+}
+
+void LowLevelClient::qserialDTRChanged(bool set) {
+	if (set) {
+		setConnectionState(ConnectionState::Connected);
+		emit connectionOpen();
+	}
+	else {
+		setConnectionState(ConnectionState::Disconnected);
+		emit errorOccured(LowLevelClientError::ConnectionClosed);
+	}
+}
+
+void LowLevelClient::setConnectionState(LowLevelClient::ConnectionState state) {
+	if (this->conn_state != state) {
+		this->conn_state = state;
+	}
+}
+
+LowLevelClient::ConnectionState LowLevelClient::getConnectionState() { 
+	return conn_state; 
 }

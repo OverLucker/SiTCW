@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QTimer>
+#include "messagewidget.h"
 #include <QCloseEvent>
 
 // VERY IMPORTANT THING!!!
@@ -19,7 +20,6 @@ SiTCW::SiTCW(QWidget *parent)
 	ui.setupUi(this);
 	
     serial = new PostSerial(this);
-	HammingCodec<7> codec;
 	serial->setCodec(new HammingCodec<7>());
 	for (auto item : QSerialPortInfo::availablePorts()) {
 		ui.netInputPortIn->insertItem(1000, item.portName(), 0);
@@ -31,8 +31,14 @@ SiTCW::SiTCW(QWidget *parent)
 	connect(this, SIGNAL(close()), this, SLOT(onClose()));
 
 	// connection events
-	// connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
-	connect(serial, &PostSerial::ClientStateChanged, this, &SiTCW::connectionOpen);
+
+	// physical connection updates
+	connect(serial, &PostSerial::connectionOpen, this, &SiTCW::connectionOpen);
+	connect(serial, &PostSerial::connectionClosed, this, &SiTCW::connectionClosed);
+
+	// logical connection updates
+	connect(serial, &PostSerial::ClientStateChanged, this, &SiTCW::updateClientState);
+
 	connect(serial, &PostSerial::errorOccured, this, &SiTCW::netError);
 	connect(ui.netBtnConnect, SIGNAL(released()), this, SLOT(netConnect()));
 	connect(ui.netBtnDisconnect, SIGNAL(released()), this, SLOT(netDisconnect()));
@@ -50,46 +56,20 @@ SiTCW::SiTCW(QWidget *parent)
 	connect(ui.messageSendButton, SIGNAL(released()), this, SLOT(add_item()));
 	connect(ui.messageList, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(select_user(QListWidgetItem *)));
 
-	ui.netBtnDisconnect->setEnabled(false);
-
+	
 }
 
 void SiTCW::SiTCW::display_message(Message& message) {
-	QGridLayout *MessageLayout = new QGridLayout();
-
-	QLabel *MessageSender = new QLabel(
-		QString("%1: %2").arg("FROM", message.getSender()),
-		ui.messageList
-	);
-	MessageSender->setStyleSheet("font-weight: bold");
-
-	QLabel *MessageRecipient = new QLabel(
-		QString("%1: %2").arg("TO", message.getRecepient()),
-		ui.messageList
-	);
-	MessageRecipient->setStyleSheet("font-weight: bold; text-align: right;");
-
-	MessageLayout->addWidget(MessageSender, 0, 0);
-	MessageLayout->addWidget(MessageRecipient, 0, 1);
-
-
-	QLabel *MessageText = new QLabel(
-		message.getMessage(),
-		ui.messageList
-	);
-	MessageText->setMaximumWidth(601);
-	MessageText->setWordWrap(true);
-
-	MessageLayout->addWidget(MessageText, 1, 0);
-
-	QWidget * MessageWidget = new QWidget();
-	MessageWidget->setStyleSheet(" background-color: #fff; border-radius: 8px; margin-bottom: 10px; ");
-	MessageWidget->setLayout(MessageLayout);
-
+	MessageWidget * wid = new MessageWidget(ui.messageList);
 	QListWidgetItem *ListItem = new QListWidgetItem();
-	ListItem->setSizeHint(MessageWidget->sizeHint());
+	wid->setStyleSheet("{background-color: #fff; }");
+	wid->display_message(message);
+	wid->setItem(ListItem);
+	ListItem->setSizeHint(wid->sizeHint());
 	ui.messageList->addItem(ListItem);
-	ui.messageList->setItemWidget(ListItem, MessageWidget);
+	ui.messageList->setItemWidget(ListItem, wid);
+	
+	connect(wid, &MessageWidget::messageRead, this, &SiTCW::messageRead);
 }
 
 void SiTCW::SiTCW::new_message(Message message){
@@ -115,27 +95,35 @@ void SiTCW::SiTCW::add_item(){
 void SiTCW::SiTCW::select_user(QListWidgetItem * item){
 
     const QString text = item->text();
-
+	// ToDo: do smthing with new selected user
 }
 
 void SiTCW::SiTCW::netConnect() {
 	int res = serial->network_connect(ui.netInputPortIn->currentText(), ui.netInputPortOut->currentText());
 	ui.statusBar->showMessage(QString("Попытка подсоединиться. Уникальное значение = %1").arg(serial->get_def_num()));
-	if (!res) {
-		QMessageBox::information(this, "Статус подключения", "Произошла ошибка");
-		ui.statusBar->showMessage("Ошибка подключения");
-	}
-	else {
-		ui.netBtnDisconnect->setEnabled(true);
-		ui.netBtnConnect->setEnabled(false);
-		ui.gbPortIn->setEnabled(false);
-		ui.gbPortOut->setEnabled(false);
-	}
 }
 
 void SiTCW::SiTCW::netDisconnect() {
-	serial->logout(serial->get_current_logged_user());
-	QTimer::singleShot(LOG_OUT_DELAY, serial, SLOT(network_disconnect()));
+	if (serial->get_current_logged_user() != "") {
+		serial->logout(serial->get_current_logged_user());
+		QTimer::singleShot(LOG_OUT_DELAY, serial, SLOT(network_disconnect()));
+	}
+	else {
+		serial->network_disconnect();
+	}
+}
+
+
+// physical connection
+void SiTCW::SiTCW::connectionOpen() {
+	ui.statusBar->showMessage("Успешно подключено к портам");
+	ui.netBtnDisconnect->setEnabled(true);
+	ui.netBtnConnect->setEnabled(false);
+	ui.gbPortIn->setEnabled(false);
+	ui.gbPortOut->setEnabled(false);
+}
+
+void SiTCW::SiTCW::connectionClosed() {
 	QMessageBox::information(this, "Статус подключения", "Разъединено");
 	ui.statusBar->showMessage("Разъединено");
 	ui.netBtnDisconnect->setEnabled(false);
@@ -143,22 +131,31 @@ void SiTCW::SiTCW::netDisconnect() {
 	ui.gbPortIn->setEnabled(true);
 	ui.gbPortOut->setEnabled(true);
 }
+// physical connection
 
-void SiTCW::SiTCW::connectionOpen(PostSerial::ClientState state) {
-	if (state == PostSerial::ClientState::Connected) {
+void SiTCW::SiTCW::updateClientState(PostSerial::ClientState state) {
+	if (state == PostSerial::ClientState::Online) {
 		QMessageBox::information(this, "Статус подключения", "Успех");
-		ui.statusBar->showMessage(QString("Успешно подключено. Адрес в сети = %1").arg(serial->get_local_address()));
+		ui.statusBar->showMessage(QString("Успешно подключено."));
+		// переключаем на страницу авторизации
+		ui.tabWidget->setCurrentIndex(1);
+	}
+
+	if (state == PostSerial::ClientState::Offline) {
+		QMessageBox::information(this, "Статус подключения", "Оффлайн");
+		ui.statusBar->showMessage(QString("Оффлайн"));
 	}
 	
 }
 
-void SiTCW::SiTCW::netError(LowLevelClient::LowLevelClientError) {
-	QMessageBox::information(this, "Статус подключения", "Произошла ошибка сети");
-	ui.statusBar->showMessage("Произошла ошибка сети");
-	ui.netBtnDisconnect->setEnabled(false);
-	ui.netBtnConnect->setEnabled(true);
-	ui.gbPortIn->setEnabled(true);
-	ui.gbPortOut->setEnabled(true);
+void SiTCW::SiTCW::netError(LowLevelClient::LowLevelClientError error) {
+	if (error == LowLevelClient::LowLevelClientError::OpenError) {
+		QMessageBox::information(this, "Статус подключения", "Не удалось подключиться к портам");
+		ui.statusBar->showMessage("Не удалось подключиться к портам");
+	}
+	if (error == LowLevelClient::LowLevelClientError::ConnectionClosed) {
+		this->connectionClosed();
+	}
 }
 
 void SiTCW::SiTCW::login() {
@@ -168,12 +165,21 @@ void SiTCW::SiTCW::login() {
 	}
 	else {
 		ui.statusBar->showMessage(QString("Авторизация прошла успешно. Адрес в сети = %1").arg(serial->get_local_address()));
+		ui.leLogin->setEnabled(false);
+		ui.lePass->setEnabled(false);
+		ui.pbLogin->setEnabled(false);
+		ui.pbLogout->setEnabled(true);
+		ui.tabWidget->setCurrentIndex(2);
 	}
 }
 
 void SiTCW::SiTCW::logout() {
 	serial->logout(serial->get_current_logged_user());
 	ui.statusBar->showMessage("Выход из сети");
+	ui.leLogin->setEnabled(true);
+	ui.lePass->setEnabled(true);
+	ui.pbLogin->setEnabled(true);
+	ui.pbLogout->setEnabled(false);
 }
 
 void SiTCW::SiTCW::addressBookAdd(QString username) {
@@ -181,16 +187,16 @@ void SiTCW::SiTCW::addressBookAdd(QString username) {
 }
 
 void SiTCW::SiTCW::addressBookRemove(QString username) {
-	try {
-		if (ui.contactList->findItems(username, Qt::MatchExactly).length() > 0)
-			ui.contactList->removeItemWidget(ui.contactList->findItems(username, Qt::MatchExactly)[0]);
-	}
-	catch (...) {
-
-	}
+	QList<QListWidgetItem*> items = ui.contactList->findItems(username, Qt::MatchExactly);
+	if (items.length() > 0)
+		ui.contactList->takeItem(ui.contactList->row(items[0]));
 }
 
 void SiTCW::SiTCW::closeEvent(QCloseEvent* ev) {
 	serial->network_disconnect();
 	ev->accept();
+}
+
+void SiTCW::SiTCW::messageRead(Message message) {
+	// ToDo: Надо вызывать соответствующую ошибку
 }

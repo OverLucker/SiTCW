@@ -27,7 +27,8 @@ SOURCES += main.cpp\
         sitcw.cpp \
     postserial.cpp \
     directed_token_ring.cpp \
-    lowlevelclient.cpp
+    lowlevelclient.cpp \
+    messagewidget.cpp
 
 HEADERS  += sitcw.h \
             app_layer.h \
@@ -36,6 +37,8 @@ HEADERS  += sitcw.h \
     postserial.h \
     message.h \
     directed_token_ring.h \
-    lowlevelclient.h
+    lowlevelclient.h \
+    messagewidget.h
 
-FORMS    += sitcw.ui
+FORMS    += sitcw.ui \
+    messagewidget.ui

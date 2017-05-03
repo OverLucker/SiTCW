@@ -1,13 +1,11 @@
 ﻿#include "directed_token_ring.h"
-#include "data_link_layer.h"
 #include <QMessageBox>
 #include <algorithm>
 #include <time.h>
 
 
-
 #define LOG_OUT_DELAY 500
-#define SINGLE_FRAME_AWAIT_TIMER 900
+#define SINGLE_FRAME_AWAIT_TIMER 3000
 
 
 DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
@@ -15,25 +13,27 @@ DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
 	connect(this, &LowLevelClient::connectionOpen, this, &DirectedTokenRing::onNetworkConnectionOpen);
 	connect(this, &LowLevelClient::errorOccured, this, &DirectedTokenRing::ringErrorHandler);
 	connect(timer, &QTimer::timeout, this, &DirectedTokenRing::frameTimeout);
+
 	qsrand(time(NULL));
 	qsrand(qrand());
 	def_number = qrand() % 254 + 1; // 1 - 255
 	known_numbers.append(def_number);
 	timer->setSingleShot(true);
 	timer->setInterval(SINGLE_FRAME_AWAIT_TIMER);
-	
 }
 
-QList<QString> DirectedTokenRing::get_contacts() {
-	return pa.values();
-}
+QList<QString> DirectedTokenRing::get_contacts() { return pa.values(); }
 
 void DirectedTokenRing::ringErrorHandler(LowLevelClientError error) {
 	if (error == LowLevelClientError::ConnectionClosed) {
 		QByteArray data;
 		data.append((quint8)SuperVisorFrameTypes::Disconnect);
 		send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
-		QTimer::singleShot(LOG_OUT_DELAY, this, SLOT(network_disconnect()));
+		// обновим статус клиента
+		setClientState(ClientState::Offline);
+		timer->stop();
+		known_numbers.clear();
+		known_numbers.append(def_number);
 	}
 
 }
@@ -62,17 +62,17 @@ void DirectedTokenRing::send(QByteArray data, QVector<QString> recipients) {
 void DirectedTokenRing::send_user_logout(const QString& username) {
 	QByteArray data;
 	data.append((quint8)SuperVisorFrameTypes::Logout);
-	data.append(local_address);
 	data.append(username);
 	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
+	// timer->start();
 }
 
 void DirectedTokenRing::send_user_login(const QString& username) {
 	QByteArray data;
 	data.append((quint8)SuperVisorFrameTypes::Login);
-	data.append(local_address);
 	data.append(username);
 	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
+	// timer->start();
 }
 
 void DirectedTokenRing::frameReadyHandler(QByteArray data) {
@@ -91,7 +91,7 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)fr_data[0]);
 		if (fr_type == SuperVisorFrameTypes::Meeting) {
 			quint8 inc_num = fr_data[1];
-			
+
 			if (known_numbers.indexOf(inc_num) < 0) {
 				known_numbers.append(inc_num);
 				std::sort(known_numbers.begin(), known_numbers.end());
@@ -102,11 +102,7 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 			if (inc_num == def_number) {
 				timer->stop();
 				// обновим статус клиента
-				if (client_state != ClientState::Connected) {
-					client_state = ClientState::Connected;
-					emit ClientStateChanged(client_state);
-				}
-				
+				setClientState(ClientState::Online);
 				return;
 			}
 
@@ -118,20 +114,20 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 		}
 
 		if (fr_type == SuperVisorFrameTypes::Login) {
-			QString username = fr_data.mid(2);
-			pa[fr_data[1]] = username;
+			QString username = fr_data.mid(1);
+			pa[f.getSender()] = username;
 			emit userLoggedIn(username);
 		}
 
 		if (fr_type == SuperVisorFrameTypes::Logout) {
-			pa.remove(fr_data[1]);
-			QString username = fr_data.mid(2);
+			pa.remove(f.getSender());
+			QString username = fr_data.mid(1);
 			emit userLoggedOut(username);
 		}
 		
 		if (fr_type == SuperVisorFrameTypes::Disconnect) {
-			emit LowLevelClient::errorOccured(LowLevelClientError::ConnectionClosed);
-			return;
+			setClientState(ClientState::Offline);
+			this->onNetworkConnectionOpen();
 		}
 	}
 	if (f.getFrameType() == FrameType::Information) {
@@ -148,6 +144,6 @@ void DirectedTokenRing::onNetworkConnectionOpen() {
 	data.append((quint8)SuperVisorFrameTypes::Meeting);
 	data.append(def_number);
 	this->last_frame = FrameBuilder::makeSupervisorFrame(0, data);
-	timer->start();
 	send_frame(last_frame);
+	timer->start();
 }

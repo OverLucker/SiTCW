@@ -11,6 +11,8 @@
 #include <QVector>
 #include "lowlevelclient.h"
 #include <QTimer>
+#include "data_link_layer.h"
+
 
 class DirectedTokenRing : public LowLevelClient {
 	Q_OBJECT
@@ -34,13 +36,12 @@ private:
 	//
 public:
 	enum class ClientState {
-		NotConnected,
-		Connected,
-		Ready
+		Offline,
+		Online
 	};
 
 private:
-	ClientState client_state = ClientState::NotConnected;
+	ClientState client_state = ClientState::Offline;
 
 	// буферы
 	//  1. буфер входящих кадров
@@ -58,6 +59,15 @@ private:
 	QByteArray last_frame;
 
 	void send_frame(QByteArray data);
+
+protected:
+	void setClientState(ClientState state) {
+		if (client_state != state) {
+			client_state = state;
+			emit ClientStateChanged(client_state);
+		}
+	}
+
 public:
 	DirectedTokenRing(QObject* parent);
 
