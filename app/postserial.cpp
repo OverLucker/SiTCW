@@ -15,8 +15,6 @@ void PostSerial::readHandle(QByteArray data) {
 		QString from = chunks[0].split('=')[1];
 		QString to = chunks[1].split('=')[1];
 		QString message = chunks[2].split('=')[1];
-		Message mess(from, to, message);
-		
 		
 		QString from_id;
 		QString to_id;
@@ -30,7 +28,8 @@ void PostSerial::readHandle(QByteArray data) {
 			to_id = query.value(0).toString();
 		}
 		query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, message, QString::number(0)));
-
+		QString message_id = query.lastInsertId().toString();
+		Message mess(from, to, message, false, message_id);
 		emit PostSerial::new_message(mess);
 	}
 	catch (...)
