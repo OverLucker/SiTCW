@@ -91,23 +91,6 @@
            <item row="0" column="1">
             <widget class="QComboBox" name="netInputPortOut"/>
            </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="cbPortInDefaults">
-             <property name="text">
-              <string>Использовать настройки по умолчанию</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="lbPortInBaudRate">
-             <property name="text">
-              <string>Бод-рейт</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="cbPortInBaudRate"/>
-           </item>
           </layout>
          </widget>
         </item>
@@ -126,23 +109,6 @@
            </item>
            <item row="0" column="1">
             <widget class="QComboBox" name="netInputPortIn"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="cbPortOutDefaults">
-             <property name="text">
-              <string>Использовать настройки по умолчанию</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="lbPortOutBaudRate">
-             <property name="text">
-              <string>Бод-рейт</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="cbPortOutBaudRate"/>
            </item>
           </layout>
          </widget>

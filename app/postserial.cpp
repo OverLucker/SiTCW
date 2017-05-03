@@ -16,9 +16,13 @@ void PostSerial::readHandle(QByteArray data) {
 		QString to = chunks[1].split('=')[1];
 		QString message = chunks[2].split('=')[1];
 		QString external_id = chunks[3].split('=')[1];
+
 		if (external_id == "-1") {
 			//"open convert"
 			Q_ASSERT(query.exec(QString("UPDATE postbox SET status = 1 WHERE message_id = \'%1\';").arg(message)));
+			Message mess(from, to, message);
+			emit message_read(mess);
+			return;
 		}
 		
 		QString from_id;
@@ -27,14 +31,15 @@ void PostSerial::readHandle(QByteArray data) {
 		if (query.first()) {
 			from_id = query.value(0).toString();
 		}
-		
+
 		Q_ASSERT(query.exec(QString("SELECT * FROM users WHERE username = \'%1\';").arg(to)));
 		if (query.first()) {
 			to_id = query.value(0).toString();
 		}
+
 		query.exec(QString("INSERT INTO postbox(sender, recipient, message, status, external_id) VALUES (%1, %2, '%3', %4, %5);").arg(from_id, to_id, message, QString::number(0), external_id));
 		QString message_id = query.lastInsertId().toString();
-		Message mess(from, to, message, false, message_id);
+		Message mess(from, to, message, false, external_id);
 		emit PostSerial::new_message(mess);
 	}
 	catch (...)
@@ -43,7 +48,7 @@ void PostSerial::readHandle(QByteArray data) {
 }
 
 
-int PostSerial::send_message(Message mess) {
+int PostSerial::send_message(Message& mess) {
 	if (logged_username == QString())
 		return false;
 
@@ -61,6 +66,7 @@ int PostSerial::send_message(Message mess) {
 	}
 	query.exec(QString("INSERT INTO postbox(sender, recipient, message, status) VALUES (%1, %2, '%3', %4);").arg(from_id, to_id, mess.getMessage(), QString::number(0)));
 	QString _id = query.lastInsertId().toString();
+	mess.setMyID(_id);
 
 	QString data = QString("FROM=%1;TO=%2;MESSAGE=%3;ID=%4").arg(logged_username, mess.getRecepient(), mess.getMessage(), _id);
 	QVector<QString> recs;

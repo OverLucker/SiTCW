@@ -63,7 +63,8 @@ void DirectedTokenRing::send_user_logout(const QString& username) {
 	QByteArray data;
 	data.append((quint8)SuperVisorFrameTypes::Logout);
 	data.append(username);
-	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
+	this->last_frame = FrameBuilder::makeSupervisorFrame(local_address, data);
+	send_frame(this->last_frame);
 	// timer->start();
 }
 
@@ -71,8 +72,9 @@ void DirectedTokenRing::send_user_login(const QString& username) {
 	QByteArray data;
 	data.append((quint8)SuperVisorFrameTypes::Login);
 	data.append(username);
-	send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
-	// timer->start();
+	this->last_frame = FrameBuilder::makeSupervisorFrame(local_address, data);
+	send_frame(this->last_frame);
+	timer->start();
 }
 
 void DirectedTokenRing::frameReadyHandler(QByteArray data) {
@@ -115,13 +117,17 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 
 		if (fr_type == SuperVisorFrameTypes::Login) {
 			QString username = fr_data.mid(1);
-			pa[f.getSender()] = username;
-			emit userLoggedIn(username);
+			
+			if (!pa.contains(f.getSender())) {
+				pa[f.getSender()] = username;
+				emit userLoggedIn(username);
+			}
 		}
 
 		if (fr_type == SuperVisorFrameTypes::Logout) {
 			pa.remove(f.getSender());
 			QString username = fr_data.mid(1);
+			timer->stop();
 			emit userLoggedOut(username);
 		}
 		
@@ -137,6 +143,9 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 
 	if (f.getSender() != local_address)
 		send_frame(data);
+	else {
+		timer->stop();
+	}
 }
 
 void DirectedTokenRing::onNetworkConnectionOpen() {

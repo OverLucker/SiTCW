@@ -70,6 +70,7 @@ void SiTCW::SiTCW::display_message(Message& message) {
 	ui.messageList->setItemWidget(ListItem, wid);
 	
 	connect(wid, &MessageWidget::messageRead, this, &SiTCW::messageRead);
+	connect(serial, &PostSerial::message_read, wid, &MessageWidget::updateMessage);
 }
 
 void SiTCW::SiTCW::new_message(Message message){
@@ -199,4 +200,5 @@ void SiTCW::SiTCW::closeEvent(QCloseEvent* ev) {
 
 void SiTCW::SiTCW::messageRead(Message message) {
 	// ToDo: Надо вызывать соответствующую ошибку
+	serial->notify_message_read(message.getId());
 }

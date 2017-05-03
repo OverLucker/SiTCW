@@ -55,7 +55,7 @@ public:
 	}
 	
 	QString get_current_logged_user();
-	int send_message(Message message);
+	int send_message(Message& message);
 	int notify_message_read(QString external_id);
 	QVector <Message> getIncomingPostbox();
 	QVector <Message> getOutcomingPostbox();

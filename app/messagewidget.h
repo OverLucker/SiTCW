@@ -29,6 +29,9 @@ protected:
 
 signals:
 	void messageRead(Message);
+
+public slots:
+	void updateMessage(Message);
 };
 
 #endif // MESSAGEWIDGET_H

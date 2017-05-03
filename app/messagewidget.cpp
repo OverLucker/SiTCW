@@ -40,3 +40,11 @@ void MessageWidget::mousePressEvent(QMouseEvent* ev) {
 void MessageWidget::setItem(QListWidgetItem * it) {
 	this->it = it;
 }
+
+void MessageWidget::updateMessage(Message message) {
+	if (this->message.getId() == message.getMessage()) {
+		ui->lbMessage->show();
+		it->setSizeHint(this->sizeHint());
+		ui->lbSTATUS->setText(QString("%1: %2").arg("STATUS", "Прочитано"));
+	}
+}

@@ -43,6 +43,10 @@ public:
 		this->message = message;
 	}
 
+	void setMyID(QString ID) {
+		this->id = ID;
+	}
+
 	// getters
 	bool is_read() { return this->read; }
 	QString getSender() { return this->from; }
