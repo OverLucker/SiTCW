@@ -11,13 +11,15 @@ protected:
 	QString from;
 	QString to;
 	QString message;
-
+	QString id;
 public:
-	Message(const QString& from, const QString& to, const QString& message, const bool read) {
+
+	Message(const QString& from, const QString& to, const QString& message, const bool read, QString id = "0") {
 		this->read = read;
 		this->from = from;
 		this->to = to;
 		this->message = message;
+		this->id = id;
 	}
 
 	Message(const QString& from, const QString& to, const QString& message) {
@@ -46,6 +48,7 @@ public:
 	QString getSender() { return this->from; }
 	QString getRecepient() { return this->to; }
 	QString getMessage() { return this->message; }
+	QString getId() { return this->id; }
 
 };
 

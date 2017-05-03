@@ -49,13 +49,14 @@ public:
 														sender int INTEGER NULL,\
 														recipient int INTEGER NULL,\
 														message TEXT NOT NULL,\
-														status INTEGER NOT NULL );");
+														status INTEGER NOT NULL,\
+														external_id INTEGER NULL );");
 
 	}
 	
 	QString get_current_logged_user();
 	int send_message(Message message);
-	int notify_message_read(Message& message);
+	int notify_message_read(QString external_id);
 	QVector <Message> getIncomingPostbox();
 	QVector <Message> getOutcomingPostbox();
 	QString get_user_id(QString username);
