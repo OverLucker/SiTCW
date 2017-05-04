@@ -142,7 +142,6 @@ void DirectedTokenRing::handlerMeeting(Frame& f) {
 
 void DirectedTokenRing::handlerDisconnect(Frame&) {
 	setClientState(ClientState::Offline);
-	this->onNetworkConnectionOpen();
 }
 
 void DirectedTokenRing::handlerLogin(Frame& f) {

@@ -128,6 +128,14 @@ void SiTCW::SiTCW::connectionClosed() {
 	ui.netBtnConnect->setEnabled(true);
 	ui.gbPortIn->setEnabled(true);
 	ui.gbPortOut->setEnabled(true);
+
+	ui.leLogin->setEnabled(true);
+	ui.lePass->setEnabled(true);
+	ui.pbLogin->setEnabled(true);
+	ui.pbLogout->setEnabled(false);
+
+	ui.messageList->clear();
+	ui.contactList->clear();
 }
 // physical connection
 
@@ -191,6 +199,13 @@ void SiTCW::SiTCW::addressBookRemove(QString username) {
 	QList<QListWidgetItem*> items = ui.contactList->findItems(username, Qt::MatchExactly);
 	if (items.length() > 0)
 		ui.contactList->takeItem(ui.contactList->row(items[0]));
+
+	if (username == serial->get_current_logged_user()) {
+		ui.leLogin->setEnabled(true);
+		ui.lePass->setEnabled(true);
+		ui.pbLogin->setEnabled(true);
+		ui.pbLogout->setEnabled(false);
+	}
 }
 
 void SiTCW::SiTCW::closeEvent(QCloseEvent* ev) {
