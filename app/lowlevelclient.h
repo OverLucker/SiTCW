@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QtSerialPort\QSerialPort>
 #include "codec.h"
+#include <QTimer>
 
 
 #define START_BYTE 0x7E
@@ -29,6 +30,7 @@ private:
 
 	// кодеки для шифровки и расшифровки сообщений
 	Codec * codec = 0;
+	QTimer* conn_timer = new QTimer();
 		
 public:
 	enum class LowLevelClientError {
@@ -57,8 +59,8 @@ public:
 
 private slots:
 	void qserialreadHandler();
-	void qserialDTRChanged(bool);
 	void errorHandler(QSerialPort::SerialPortError);
+	void connTimerHandler();
 
 signals:
 	void connectionOpen();

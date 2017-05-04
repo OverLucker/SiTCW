@@ -34,7 +34,7 @@ void DirectedTokenRing::ringErrorHandler(LowLevelClientError error) {
 		QByteArray data;
 		data.append((quint8)SuperVisorFrameTypes::Disconnect);
 		send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
-		timer->stop();
+		// timer->stop();
 		known_numbers.clear();
 		known_numbers.append(def_number);
 		// обновим статус клиента
@@ -57,7 +57,9 @@ void DirectedTokenRing::send(QByteArray data, QVector<QString> recipients) {
 	for (auto it : recipients)
 		rec.append(pa.key(it));
 	
-	send_frame(FrameBuilder::makeInformationFrame(local_address, rec, data));
+	this->last_frame = FrameBuilder::makeInformationFrame(local_address, rec, data);
+	send_frame(this->last_frame);
+	this->timer->start();
 }
 
 void DirectedTokenRing::send_user_logout(const QString& username) {
@@ -86,6 +88,30 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 
 	if (frame_type == FrameType::SuperVisor) {
 		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)f.getData()[0]);
+		if (fr_type == SuperVisorFrameTypes::Meeting) {
+			QByteArray fr_data = f.getData();
+			quint8 inc_num = fr_data[1];
+
+			if (known_numbers.indexOf(inc_num) < 0) {
+				known_numbers.append(inc_num);
+				std::sort(known_numbers.begin(), known_numbers.end());
+			}
+
+			local_address = known_numbers.indexOf(def_number) + 1;
+
+			if (inc_num == def_number) {
+				timer->stop();
+				// обновим статус клиента
+				setClientState(ClientState::Online);
+				return;
+			}
+
+			QByteArray new_data;
+			new_data.append((quint8)SuperVisorFrameTypes::Meeting);
+			new_data.append(inc_num);
+			send_frame(FrameBuilder::makeSupervisorFrame(0, new_data));
+			return;
+		}
 		(this->*handlers[fr_type])(f);
 	}
 
@@ -94,7 +120,7 @@ void DirectedTokenRing::frameReadyHandler(QByteArray data) {
 				emit new_message(f.getData());
 	}
 
-	if (f.getSender() != local_address)
+	if (f.getSender() != local_address || f.getSender() == 0)
 		send_frame(data);
 	else {
 		timer->stop();
@@ -111,27 +137,7 @@ void DirectedTokenRing::onNetworkConnectionOpen() {
 }
 
 void DirectedTokenRing::handlerMeeting(Frame& f) {
-	QByteArray fr_data = f.getData();
-	quint8 inc_num = fr_data[1];
-
-	if (known_numbers.indexOf(inc_num) < 0) {
-		known_numbers.append(inc_num);
-		std::sort(known_numbers.begin(), known_numbers.end());
-	}
-
-	local_address = known_numbers.indexOf(def_number) + 1;
-
-	if (inc_num == def_number) {
-		timer->stop();
-		// обновим статус клиента
-		setClientState(ClientState::Online);
-		return;
-	}
-
-	QByteArray new_data;
-	new_data.append((quint8)SuperVisorFrameTypes::Meeting);
-	new_data.append(inc_num);
-	send_frame(FrameBuilder::makeSupervisorFrame(0, new_data));
+	
 }
 
 void DirectedTokenRing::handlerDisconnect(Frame&) {
