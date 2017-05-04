@@ -15,7 +15,7 @@ class MessageWidget : public QWidget
 
 public:
     explicit MessageWidget(QWidget *parent = 0);
-	void display_message(Message);
+	void display_message(Message, bool);
 	void setItem(QListWidgetItem *);
     ~MessageWidget();
 

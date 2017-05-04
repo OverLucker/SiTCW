@@ -59,11 +59,11 @@ SiTCW::SiTCW(QWidget *parent)
 	
 }
 
-void SiTCW::SiTCW::display_message(Message& message) {
+void SiTCW::SiTCW::display_message(Message& message, bool inc) {
 	MessageWidget * wid = new MessageWidget(ui.messageList);
 	QListWidgetItem *ListItem = new QListWidgetItem();
 	wid->setStyleSheet("{background-color: #fff; }");
-	wid->display_message(message);
+	wid->display_message(message, inc);
 	wid->setItem(ListItem);
 	ListItem->setSizeHint(wid->sizeHint());
 	ui.messageList->addItem(ListItem);
@@ -74,10 +74,7 @@ void SiTCW::SiTCW::display_message(Message& message) {
 }
 
 void SiTCW::SiTCW::new_message(Message message){
-	display_message(message);
-    
-
-    // ... insert in database...
+	display_message(message, false);
 }
 
 void SiTCW::SiTCW::add_item(){
@@ -87,7 +84,7 @@ void SiTCW::SiTCW::add_item(){
 		QString to = ui.contactList->currentItem()->text();
 		Message mess(serial->get_current_logged_user(), to, ui.messageTextInput->toPlainText());
 		serial->send_message(mess);
-		display_message(mess);
+		display_message(mess, true);
 		// clear input
 		ui.messageTextInput->clear();
 	}
@@ -170,7 +167,8 @@ void SiTCW::SiTCW::login() {
 		ui.lePass->setEnabled(false);
 		ui.pbLogin->setEnabled(false);
 		ui.pbLogout->setEnabled(true);
-		ui.tabWidget->setCurrentIndex(2);
+		for (auto it : serial->getOutcomingPostbox())
+			display_message(it, false);
 	}
 }
 
@@ -185,6 +183,8 @@ void SiTCW::SiTCW::logout() {
 
 void SiTCW::SiTCW::addressBookAdd(QString username) {
 	ui.contactList->addItem(username);
+	if (username == serial->get_current_logged_user())
+		ui.tabWidget->setCurrentIndex(2);
 }
 
 void SiTCW::SiTCW::addressBookRemove(QString username) {
@@ -199,6 +199,5 @@ void SiTCW::SiTCW::closeEvent(QCloseEvent* ev) {
 }
 
 void SiTCW::SiTCW::messageRead(Message message) {
-	// ToDo: Надо вызывать соответствующую ошибку
 	serial->notify_message_read(message.getId());
 }

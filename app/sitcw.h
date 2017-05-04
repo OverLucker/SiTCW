@@ -11,7 +11,7 @@ class SiTCW : public QMainWindow
 	Q_OBJECT
 
 private:
-	void display_message(Message&);
+	void display_message(Message&, bool);
 public:
 	SiTCW(QWidget *parent = Q_NULLPTR);
 

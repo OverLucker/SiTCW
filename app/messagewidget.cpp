@@ -20,13 +20,20 @@ MessageWidget::~MessageWidget()
     delete ui;
 }
 
-void MessageWidget::display_message(Message message) {
+void MessageWidget::display_message(Message message, bool incoming) {
 	this->message = message;
 	this->setBackgroundRole(QPalette::ColorRole::Base);
 	ui->lbMessage->setText(message.getMessage());
-	ui->lbMessage->hide();
+	if (message.getStatus()) {
+		ui->lbSTATUS->setText(QString("%1: %2").arg("STATUS", "Прочитано"));
+	}
+	else {
+		ui->lbSTATUS->setText(QString("%1: %2").arg("STATUS", "Не прочитано"));
+		if (!incoming)
+			ui->lbMessage->hide();
+	}
+	
 	ui->lbFROM->setText(QString("%1: %2").arg("FROM", message.getSender()));
-	ui->lbSTATUS->setText(QString("%1: %2").arg("STATUS", "Не прочитано"));
 	ui->lbTO->setText(QString("%1: %2").arg("TO", message.getRecepient()));
 }
 

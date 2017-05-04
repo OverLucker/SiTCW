@@ -53,6 +53,7 @@ public:
 	QString getRecepient() { return this->to; }
 	QString getMessage() { return this->message; }
 	QString getId() { return this->id; }
+	bool getStatus() { return this->read; }
 
 };
 

@@ -124,13 +124,14 @@ QVector <Message> PostSerial::getIncomingPostbox() {
 	QSqlQuery query;
 	QString to = get_user_id(get_current_logged_user());
 	QVector <Message> postboxMessages;
-	Q_ASSERT(query.exec(QString("SELECT sender, message, status  FROM postbox WHERE recipient = \'%1\';").arg(to)));
+	Q_ASSERT(query.exec(QString("SELECT message_id, sender, message, status  FROM postbox WHERE recipient = \'%1\';").arg(to)));
 
 	while (query.next()) {
-		QString from = query.value(0).toString();
-		QString message = query.value(1).toString();
-		bool status = query.value(2).toInt();
-		postboxMessages.push_back(Message(from, to, message, status));
+		QString id = query.value(0).toString();
+		QString from = query.value(1).toString();
+		QString message = query.value(2).toString();
+		bool status = query.value(3).toInt();
+		postboxMessages.push_back(Message(from, to, message, status, id));
 	}
 	return postboxMessages;
 }
@@ -139,13 +140,14 @@ QVector <Message> PostSerial::getOutcomingPostbox() {
 	QSqlQuery query;
 	QString from = get_user_id( get_current_logged_user());
 	QVector <Message> postboxMessages;
-	Q_ASSERT(query.exec(QString("SELECT recipient, message, status  FROM postbox WHERE sender = \'%1\';").arg(from)));
+	Q_ASSERT(query.exec(QString("SELECT message_id, recipient, message, status  FROM postbox WHERE sender = \'%1\';").arg(from)));
 
 	while (query.next()) {
-		QString to = query.value(0).toString();
-		QString message = query.value(1).toString();
-		bool status = query.value(2).toInt();
-		postboxMessages.push_back(Message(from, to, message, status));
+		QString id = query.value(0).toString();
+		QString to = query.value(1).toString();
+		QString message = query.value(2).toString();
+		bool status = query.value(3).toInt();
+		postboxMessages.push_back(Message(from, to, message, status, id));
 	}
 	return postboxMessages;
 }
@@ -153,7 +155,7 @@ QVector <Message> PostSerial::getOutcomingPostbox() {
 QString PostSerial::get_user_id(QString username) {
 	QSqlQuery query;
 	QString id;
-	Q_ASSERT(query.exec(QString("SELECT id FROM users WHERE username = \'%1\';").arg(username)));
+	Q_ASSERT(query.exec(QString("SELECT userid FROM users WHERE username = \'%1\';").arg(username)));
 	if (query.first()) {
 		id = query.value(0).toString();
 	}
