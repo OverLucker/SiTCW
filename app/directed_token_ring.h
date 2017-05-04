@@ -7,12 +7,14 @@
 #define LOG_OUT_DELAY 500
 
 #include <QMap>
-#include "codec.h"
 #include <QVector>
 #include "lowlevelclient.h"
 #include <QTimer>
 #include "data_link_layer.h"
 
+class DirectedTokenRing;
+
+typedef void(DirectedTokenRing::*handler)(Frame&);
 
 class DirectedTokenRing : public LowLevelClient {
 	Q_OBJECT
@@ -34,6 +36,13 @@ private:
 	//  2. подключен, но не готов к передаче
 	//  3. подключен и готов к передаче
 	//
+
+	QMap<SuperVisorFrameTypes, handler> handlers;
+	void handlerMeeting(Frame&);
+	void handlerDisconnect(Frame&);
+	void handlerLogin(Frame&);
+	void handlerLogout(Frame&);
+
 public:
 	enum class ClientState {
 		Offline,
@@ -53,8 +62,7 @@ private:
 	QVector<QByteArray> buffer_out;
 	QMap<quint8, QString> pa;
 
-	// кодеки для шифровки и расшифровки сообщений
-	Codec * codec = 0;
+
 
 	QByteArray last_frame;
 
@@ -72,7 +80,6 @@ public:
 	DirectedTokenRing(QObject* parent);
 
 
-	void setCodec(Codec* codec) { this->codec = codec; }
 
 	void send(QByteArray data, QVector<QString> recipients);
 	void send_user_login(const QString& username);

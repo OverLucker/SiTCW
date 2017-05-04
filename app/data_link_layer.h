@@ -1,11 +1,5 @@
 ﻿#pragma once
 
-// В данном файле реализованы функции для работы с канальным уровнем
-//  Данный файл является подключаемым, все взаимодействия определяются
-//   вызовами функций api
-// Наименование данных функций начинается с dl_api_
-
-
 #ifndef DATA_LINK_LAYER
 #define DATA_LINK_LAYER
 
@@ -24,7 +18,7 @@ enum class SuperVisorFrameTypes {
 
 
 
-#define FRAME_HEADER_SIZE 12
+#define FRAME_HEADER_SIZE 5
 #define MAX_DATA_SIZE 256 // in bytes
 #define MAX_FRAME_SIZE FRAME_HEADER_SIZE + MAX_DATA_SIZE
 #define FRAME_SECURE_BYTE 0x7E
@@ -122,17 +116,11 @@ public:
 	}
 
 	static Frame makeSupervisorFrame(const quint8& sender, const QByteArray& data) {
-		// ToDo: split to frames
-		QVector<quint8> recipients;
-		for (int i = 1; i < 16; ++i) {
-			recipients.append(i);
-		}
-
 		return Frame(
 			FrameType::SuperVisor,
 			true,
 			sender,
-			recipients,
+			QVector<quint8>(),
 			data
 		);
 	}

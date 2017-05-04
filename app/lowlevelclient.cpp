@@ -89,6 +89,9 @@ void LowLevelClient::qserialreadHandler() {
 			}
 			if (c == STOP_BYTE) {
 				this->data_started = false;
+				// decode with codec
+				if (this->codec)
+					data = codec->decode(data);
 				// notify everyone that data is read
 				emit frame_ready(data);
 				// clear the buffer
@@ -105,8 +108,12 @@ void LowLevelClient::qserialreadHandler() {
 	}
 }
 
-void LowLevelClient::send(const QByteArray& data) {
+void LowLevelClient::send(QByteArray data) {
+	if (this->codec)
+		data = codec->encode(data);
+	
 	QByteArray new_data;
+
 
 	// стартовый байт начала данных
 	new_data.append(START_BYTE);

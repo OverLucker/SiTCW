@@ -20,6 +20,11 @@ DirectedTokenRing::DirectedTokenRing(QObject* parent) : LowLevelClient(parent) {
 	known_numbers.append(def_number);
 	timer->setSingleShot(true);
 	timer->setInterval(SINGLE_FRAME_AWAIT_TIMER);
+
+	handlers[SuperVisorFrameTypes::Meeting] = &DirectedTokenRing::handlerMeeting;
+	handlers[SuperVisorFrameTypes::Disconnect] = &DirectedTokenRing::handlerDisconnect;
+	handlers[SuperVisorFrameTypes::Login] = &DirectedTokenRing::handlerLogin;
+	handlers[SuperVisorFrameTypes::Logout] = &DirectedTokenRing::handlerLogout;
 }
 
 QList<QString> DirectedTokenRing::get_contacts() { return pa.values(); }
@@ -29,20 +34,16 @@ void DirectedTokenRing::ringErrorHandler(LowLevelClientError error) {
 		QByteArray data;
 		data.append((quint8)SuperVisorFrameTypes::Disconnect);
 		send_frame(FrameBuilder::makeSupervisorFrame(local_address, data));
-		// обновим статус клиента
-		setClientState(ClientState::Offline);
 		timer->stop();
 		known_numbers.clear();
 		known_numbers.append(def_number);
+		// обновим статус клиента
+		setClientState(ClientState::Offline);
 	}
 
 }
 
 void DirectedTokenRing::send_frame(QByteArray data) {
-	// encode with codec
-	if (this->codec)
-		data = codec->encode(data);
-
 	LowLevelClient::send(data);
 }
 
@@ -65,7 +66,7 @@ void DirectedTokenRing::send_user_logout(const QString& username) {
 	data.append(username);
 	this->last_frame = FrameBuilder::makeSupervisorFrame(local_address, data);
 	send_frame(this->last_frame);
-	// timer->start();
+	timer->start();
 }
 
 void DirectedTokenRing::send_user_login(const QString& username) {
@@ -78,65 +79,17 @@ void DirectedTokenRing::send_user_login(const QString& username) {
 }
 
 void DirectedTokenRing::frameReadyHandler(QByteArray data) {
-	// decode with codec
-	if (this->codec)
-		data = codec->decode(data);
-
 	Frame f = FrameBuilder::fromByteArray(data);
-	if (f.getFrameType() == FrameType::Null)
+	FrameType frame_type = f.getFrameType();
+	if (frame_type == FrameType::Null)
 		return;
 
-	QByteArray fr_data = f.getData();
-
-	if (f.getFrameType() == FrameType::SuperVisor) {
-		
-		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)fr_data[0]);
-		if (fr_type == SuperVisorFrameTypes::Meeting) {
-			quint8 inc_num = fr_data[1];
-
-			if (known_numbers.indexOf(inc_num) < 0) {
-				known_numbers.append(inc_num);
-				std::sort(known_numbers.begin(), known_numbers.end());
-			}
-
-			local_address = known_numbers.indexOf(def_number) + 1;
-
-			if (inc_num == def_number) {
-				timer->stop();
-				// обновим статус клиента
-				setClientState(ClientState::Online);
-				return;
-			}
-
-			QByteArray data;
-			data.append((quint8)SuperVisorFrameTypes::Meeting);
-			data.append(inc_num);
-			send_frame(FrameBuilder::makeSupervisorFrame(0, data));
-			return;
-		}
-
-		if (fr_type == SuperVisorFrameTypes::Login) {
-			QString username = fr_data.mid(1);
-			
-			if (!pa.contains(f.getSender())) {
-				pa[f.getSender()] = username;
-				emit userLoggedIn(username);
-			}
-		}
-
-		if (fr_type == SuperVisorFrameTypes::Logout) {
-			pa.remove(f.getSender());
-			QString username = fr_data.mid(1);
-			timer->stop();
-			emit userLoggedOut(username);
-		}
-		
-		if (fr_type == SuperVisorFrameTypes::Disconnect) {
-			setClientState(ClientState::Offline);
-			this->onNetworkConnectionOpen();
-		}
+	if (frame_type == FrameType::SuperVisor) {
+		SuperVisorFrameTypes fr_type = static_cast<SuperVisorFrameTypes>((quint8)f.getData()[0]);
+		(this->*handlers[fr_type])(f);
 	}
-	if (f.getFrameType() == FrameType::Information) {
+
+	if (frame_type == FrameType::Information) {
 		if (f.getRecipients().indexOf(local_address) >= 0)
 				emit new_message(f.getData());
 	}
@@ -155,4 +108,49 @@ void DirectedTokenRing::onNetworkConnectionOpen() {
 	this->last_frame = FrameBuilder::makeSupervisorFrame(0, data);
 	send_frame(last_frame);
 	timer->start();
+}
+
+void DirectedTokenRing::handlerMeeting(Frame& f) {
+	QByteArray fr_data = f.getData();
+	quint8 inc_num = fr_data[1];
+
+	if (known_numbers.indexOf(inc_num) < 0) {
+		known_numbers.append(inc_num);
+		std::sort(known_numbers.begin(), known_numbers.end());
+	}
+
+	local_address = known_numbers.indexOf(def_number) + 1;
+
+	if (inc_num == def_number) {
+		timer->stop();
+		// обновим статус клиента
+		setClientState(ClientState::Online);
+		return;
+	}
+
+	QByteArray new_data;
+	new_data.append((quint8)SuperVisorFrameTypes::Meeting);
+	new_data.append(inc_num);
+	send_frame(FrameBuilder::makeSupervisorFrame(0, new_data));
+}
+
+void DirectedTokenRing::handlerDisconnect(Frame&) {
+	setClientState(ClientState::Offline);
+	this->onNetworkConnectionOpen();
+}
+
+void DirectedTokenRing::handlerLogin(Frame& f) {
+	QString username = f.getData().mid(1);
+
+	if (!pa.contains(f.getSender())) {
+		pa[f.getSender()] = username;
+		emit userLoggedIn(username);
+	}
+}
+
+void DirectedTokenRing::handlerLogout(Frame& f) {
+	pa.remove(f.getSender());
+	QString username = f.getData().mid(1);
+	timer->stop();
+	emit userLoggedOut(username);
 }

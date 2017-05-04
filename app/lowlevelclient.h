@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QtSerialPort\QSerialPort>
+#include "codec.h"
 
 
 #define START_BYTE 0x7E
@@ -25,6 +26,9 @@ private:
 	bool data_started = false;
 	bool esc_char = false;
 	QByteArray buffer;
+
+	// кодеки для шифровки и расшифровки сообщений
+	Codec * codec = 0;
 		
 public:
 	enum class LowLevelClientError {
@@ -46,9 +50,10 @@ public:
 	LowLevelClient(QObject* parent = nullptr);
 	int network_connect(const QString& port_in, const QString& port_out);
 	int network_disconnect();
-	void send(const QByteArray& data);
+	void send(QByteArray data);
 	ConnectionState getConnectionState();
 
+	void setCodec(Codec* codec) { this->codec = codec; }
 
 private slots:
 	void qserialreadHandler();
