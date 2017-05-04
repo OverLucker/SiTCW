@@ -124,7 +124,9 @@ QVector <Message> PostSerial::getIncomingPostbox() {
 	QSqlQuery query;
 	QString to = get_user_id(get_current_logged_user());
 	QVector <Message> postboxMessages;
-	Q_ASSERT(query.exec(QString("SELECT sender, message, status  FROM postbox WHERE recipient = \'%1\';").arg(to)));
+	Q_ASSERT(query.exec(QString("SELECT u.username, p.message, p.status FROM postbox as p \
+								 JOIN users AS u ON u.userid = p.sender \
+								 WHERE p.recipient = \'%1\';").arg(to)));
 
 	while (query.next()) {
 		QString from = query.value(0).toString();
@@ -139,7 +141,9 @@ QVector <Message> PostSerial::getOutcomingPostbox() {
 	QSqlQuery query;
 	QString from = get_user_id( get_current_logged_user());
 	QVector <Message> postboxMessages;
-	Q_ASSERT(query.exec(QString("SELECT recipient, message, status  FROM postbox WHERE sender = \'%1\';").arg(from)));
+	Q_ASSERT(query.exec(QString("SELECT u.username, p.message, p.status FROM postbox as p \
+								 JOIN users AS u ON u.userid = p.recipient \
+								 WHERE p.sender = \'%1\';").arg(from)));
 
 	while (query.next()) {
 		QString to = query.value(0).toString();
